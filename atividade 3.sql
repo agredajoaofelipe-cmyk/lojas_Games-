@@ -913,3 +913,64 @@ select nome, marca, preco from produto;
 select cnpj, email from fornecedor;
 select * from cliente;
 select nome, estado from cliente where estado = 'SP';
+select * from funcionario;
+select * from estoque;
+select * from pedido;
+select * from pagamento;
+select * from item_pedido;
+select * from categoria;
+select * from produto;
+select * from fornecedor;
+
+select nome, cpf from funcionario;
+
+select data_nasc, cidade, estado from cliente;
+
+select * from produto where preco >= 1000;
+
+select * from produto where preco < 500;
+
+select * from funcionario where salario > 6000;
+
+select * from produto where marca = "dell";
+
+select preco from produto where preco > 500 and preco <2000 order by preco desc; 
+
+select * from pfuncionario where salario > 5000 and cargo = 'gerentee de projetos';
+
+select cargo, salario from funcionario;
+select * from cliente where cidade = 'curitiba' or cidade = 'SP';
+
+select * from produto where preco > 1000 and preco < 8000 order by preco desc;
+
+select * from produto where modelo like "a%" order by modelo;
+
+select nome from cliente order by nome;
+
+select nome, preco from produto where preco >= 500 order by preco;
+
+select nome, preco from produto where preco >= 500 order by nome;
+
+select * from pedido order by valor_total desc;
+
+select * from cliente where nome = "a%";
+
+select * from cliente where nome like "%o";
+
+select * from produto where nome like "%notebook%";
+
+select *  from funcionario where nome like "%silva%";
+
+select * from produto where preco between 1000 and 5000;
+
+select * from funcionario where salario between 5000 and 8000 order by salario;
+
+select * from cliente where estado in("PR","SP","RJ");
+
+select * from pedido where status in ("concluido", "cancelado");
+
+select * from pagamento where data_pagamento is null;
+
+select nome,preco from produto where preco > 1000 and marca = 'dell'order by preco desc;
+
+select nome,marca,preco from produto where preco between 500 and 3000 and marca like "a%" order by preco;  
