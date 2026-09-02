@@ -936,7 +936,7 @@ select * from produto where marca = "dell";
 
 select preco from produto where preco > 500 and preco <2000 order by preco desc; 
 
-select * from pfuncionario where salario > 5000 and cargo = 'gerentee de projetos';
+select * from pfuncionario where salario > 5000 and cargo = 'gerente de projetos';
 
 select cargo, salario from funcionario;
 select * from cliente where cidade = 'curitiba' or cidade = 'SP';
