@@ -11,73 +11,1014 @@ cidade varchar(50) not null,
 estado char(2) not null,
 data_cadastro date not null
 );
+
 show tables;
 
-CREATE TABLE funcionario (
-    id_funcionario INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    cpf VARCHAR(11) UNIQUE NOT NULL,
-    cargo VARCHAR(50),
-    salario DECIMAL(10,2)
+create table funcionario (
+    id_funcionario int auto_increment primary key,
+    nome varchar(100) not null,
+    cpf varchar(11) unique not null,
+    cargo varchar(50),
+    salario decimal(10,2)
 );
 
-CREATE TABLE fornecedor (
-    id_fornecedor INT AUTO_INCREMENT PRIMARY KEY,
-    nome_fantasia VARCHAR(100) NOT NULL,
-    razao_social VARCHAR(100),
-    cnpj VARCHAR(14) UNIQUE NOT NULL,
-    telefone VARCHAR(15)
+create table fornecedor(
+id_fornecedor int auto_increment primary key,
+razao_social varchar(150) not null,
+nome_fantasia varchar(100) not null,
+cnpj varchar(18) not null unique,
+email varchar (50)not null,
+estado char (2)
 );
 
-CREATE TABLE categoria (
-    id_categoria INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(50) NOT NULL
+create table categoria (
+id_categoria int auto_increment primary key,
+nome varchar(100) not null unique,
+descricao varchar(255)
+);
+show tables;
+
+create table produto (
+id_produto int auto_increment primary key,
+id_categoria int not null,
+id_fornecedor int not null,
+nome varchar(150) not null,
+descricao TEXT,
+preco decimal (10,2) not null,
+custo decimal (10,2) unique,
+codigo_barras varchar(30)unique,
+marca varchar(100) not null,
+modelo varchar(100) not null,
+data_cadastro date not null
+);
+show tables;
+
+alter table produto add constraint fk_produto_categoria foreign key
+(id_categoria) references categoria(id_categoria),
+add constraint fk_produto_fornecedor foreign key (id_fornecedor)
+references fornecedor(id_fronecedor);
+
+select * from produto;
+
+create table estoque (
+id_estoque int auto_increment primary key,
+id_produto int not null unique,
+id_fornecedor int not null,
+quantidade int not null default 0,
+estoque_minimo int not null default 5,
+ultima_atualizacao datetime not null,
+
+foreign key (id_produto) references produto(id_produto),
+foreign key(id_fornecedor) references fornecedor(id_fornecedor)
 );
 
-CREATE TABLE produto (
-    id_produto INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    preco DECIMAL(10,2) NOT NULL,
-    id_categoria INT,
-    id_fornecedor INT,
-    FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria),
-    FOREIGN KEY (id_fornecedor) REFERENCES fornecedor(id_fornecedor)
+alter table estoque add column id_fornecedor int not null;
+alter table estoque add constraint fk_estoque_fornecedor foreign key (id_fornecedor) references fornecedor(id_fornecedor);
+
+show tables;
+
+alter table produto rename column codigo_barras to cord_barras;
+
+create table pedido(
+id_pedido int auto_increment primary key,
+id_cliente int not null,
+id_funcionario int not null,
+data_pedido datetime not null,
+status varchar(30) not null,
+valor_total decimal(10,2) not null,
+
+foreign key (id_cliente) references cliente(id_cliente),
+foreign key (id_funcionario) references funcionario(id_funcionario)
 );
 
-CREATE TABLE estoque (
-    id_estoque INT AUTO_INCREMENT PRIMARY KEY,
-    id_produto INT UNIQUE,
-    quantidade INT NOT NULL DEFAULT 0,
-    localizacao VARCHAR(50),
-    FOREIGN KEY (id_produto) REFERENCES produto(id_produto)
+select * from funcionario;
+
+create table item_pedido (
+id_item int auto_increment primary key,
+id_pedido int not null,
+id_produto int not null,
+quantidade int not null,
+preco_unitario decimal (10, 2) not null,
+desconto decimal(10, 2) default 0,
+
+foreign key (id_pedido) references pedido(id_pedido),
+foreign key (id_produto) references produto(id_produto)
 );
 
-CREATE TABLE pedido (
-    id_pedido INT AUTO_INCREMENT PRIMARY KEY,
-    data_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status_pedido VARCHAR(20),
-    id_cliente INT,
-    id_funcionario INT,
-    FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
-    FOREIGN KEY (id_funcionario) REFERENCES funcionario(id_funcionario)
+create table pagamento (
+id_pagamento int auto_increment primary key,
+id_pedido int not null,
+data_pagamento datetime,
+valor decimal(10,2) not null,
+forma_pagamento varchar(30) not null,
+status varchar(20) not null,
+
+foreign key (id_pedido) references pedido(id_pedido)
 );
 
-CREATE TABLE item_pedido (
-    id_pedido INT,
-    id_produto INT,
-    quantidade INT NOT NULL,
-    preco_unitario DECIMAL(10,2) NOT NULL,
-    PRIMARY KEY (id_pedido, id_produto),
-    FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido),
-    FOREIGN KEY (id_produto) REFERENCES produto(id_produto)
-);
+show tables;
 
-CREATE TABLE pagamento (
+select * from cliente;
+select * from funcionario;
+select * from fornecedor;
+select * from categoria;
+select * from produto;
+select * from estoque;
+select * from pagamento;
+select * from item_pedido;
+select * from pedido;
+
+INSERT INTO cliente (nome, cpf, email, telefone, data_nascimento, cidade, estado, data_cadastro) VALUES
+('Ana Silva', '123.456.789-01', 'ana.silva@email.com', '(11) 98765-4321', '1988-03-15', 'São Paulo', 'SP', '2023-01-10'),
+('Carlos Eduardo Santos', '234.567.890-12', 'carlos.santos@email.com', '(21) 97654-3210', '1992-07-22', 'Rio de Janeiro', 'RJ', '2023-01-12'),
+('Mariana Oliveira', '345.678.901-23', 'mariana.oliveira@email.com', '(31) 96543-2109', '1995-11-05', 'Belo Horizonte', 'MG', '2023-01-15'),
+('Lucas Pereira', '456.789.012-34', 'lucas.pereira@email.com', '(41) 95432-1098', '1985-04-30', 'Curitiba', 'PR', '2023-01-18'),
+('Beatriz Costa', '567.890.123-45', 'beatriz.costa@email.com', '(51) 94321-0987', '1998-09-12', 'Porto Alegre', 'RS', '2023-01-20'),
+('Gabriel Rodrigues', '678.901.234-56', 'gabriel.rodrigues@email.com', '(71) 93210-9876', '1990-01-25', 'Salvador', 'BA', '2023-01-22'),
+('Fernanda Lima', '789.012.345-67', 'fernanda.lima@email.com', '(85) 92109-8765', '1987-06-18', 'Fortaleza', 'CE', '2023-01-25'),
+('Rafael Souza', '890.123.456-78', 'rafael.souza@email.com', '(61) 91098-7654', '1993-12-08', 'Brasília', 'DF', '2023-01-28'),
+('Juliana Alves', '901.234.567-89', 'juliana.alves@email.com', '(81) 90987-6543', '1996-02-14', 'Recife', 'PE', '2023-02-01'),
+('Thiago Ferreira', '012.345.678-90', 'thiago.ferreira@email.com', '(27) 99876-5432', '1989-08-03', 'Vitória', 'ES', '2023-02-03'),
+('Camila Rocha', '111.222.333-44', 'camila.rocha@email.com', '(19) 98765-1111', '1994-05-19', 'Campinas', 'SP', '2023-02-05'),
+('Bruno Martins', '222.333.444-55', 'bruno.martins@email.com', '(47) 97654-2222', '1991-10-10', 'Joinville', 'SC', '2023-02-08'),
+('Patricia Gomes', '333.444.555-66', 'patricia.gomes@email.com', '(62) 96543-3333', '1986-07-07', 'Goiânia', 'GO', '2023-02-10'),
+('Rodrigo Ribeiro', '444.555.666-77', 'rodrigo.ribeiro@email.com', '(91) 95432-4444', '1997-03-28', 'Belém', 'PA', '2023-02-12'),
+('Larissa Carvalho', '555.666.777-88', 'larissa.carvalho@email.com', '(98) 94321-5555', '1999-01-02', 'São Luís', 'MA', '2023-02-15'),
+('Diego Almeida', '666.777.888-99', 'diego.almeida@email.com', '(84) 93210-6666', '1984-09-17', 'Natal', 'RN', '2023-02-18'),
+('Amanda Lopes', '777.888.999-00', 'amanda.lopes@email.com', '(83) 92109-7777', '1993-04-11', 'João Pessoa', 'PB', '2023-02-20'),
+('Felipe Barbosa', '888.999.000-11', 'felipe.barbosa@email.com', '(86) 91098-8888', '1990-11-23', 'Teresina', 'PI', '2023-02-22'),
+('Letícia Araujo', '999.000.111-22', 'leticia.araujo@email.com', '(82) 90987-9999', '1995-08-09', 'Maceió', 'AL', '2023-02-25'),
+('Matheus Melo', '000.111.222-33', 'matheus.melo@email.com', '(79) 99876-0000', '1992-06-30', 'Aracaju', 'SE', '2023-02-28'),
+('Vanessa Cardoso', '123.123.123-12', 'vanessa.cardoso@email.com', '(65) 98765-1234', '1987-12-05', 'Cuiabá', 'MT', '2023-03-01'),
+('Gustavo Teixeira', '234.234.234-23', 'gustavo.teixeira@email.com', '(67) 97654-2345', '1994-02-20', 'Campo Grande', 'MS', '2023-03-03'),
+('Jessica Marques', '345.345.345-34', 'jessica.marques@email.com', '(63) 96543-3456', '1998-10-14', 'Palmas', 'TO', '2023-03-05'),
+('Leonardo Nascimento', '456.456.456-45', 'leonardo.nascimento@email.com', '(92) 95432-4567', '1989-05-01', 'Manaus', 'AM', '2023-03-08'),
+('Aline Ramos', '567.567.567-56', 'aline.ramos@email.com', '(68) 94321-5678', '1991-09-27', 'Rio Branco', 'AC', '2023-03-10'),
+('Vinicius Castro', '678.678.678-67', 'vinicius.castro@email.com', '(69) 93210-6789', '1986-03-08', 'Porto Velho', 'RO', '2023-03-12'),
+('Gabriela Nunes', '789.789.789-78', 'gabriela.nunes@email.com', '(95) 92109-7890', '1997-07-16', 'Boa Vista', 'RR', '2023-03-15'),
+('Eduardo Silva', '890.890.890-89', 'eduardo.silva@email.com', '(96) 91098-8901', '1993-01-11', 'Macapá', 'AP', '2023-03-18'),
+('Isabela Mendes', '901.901.901-90', 'isabela.mendes@email.com', '(48) 90987-9012', '1996-04-04', 'Florianópolis', 'SC', '2023-03-20'),
+('Daniel Freitas', '012.012.012-01', 'daniel.freitas@email.com', '(43) 99876-0123', '1990-08-29', 'Londrina', 'PR', '2023-03-22'),
+('Renata Vieira', '111.333.555-77', 'renata.vieira@email.com', '(44) 98765-2233', '1988-11-12', 'Maringá', 'PR', '2023-03-25'),
+('Marcelo Machado', '222.444.666-88', 'marcelo.machado@email.com', '(16) 97654-3344', '1985-02-18', 'Ribeirão Preto', 'SP', '2023-03-28'),
+('Bruna Santoro', '333.555.777-99', 'bruna.santoro@email.com', '(15) 96543-4455', '1992-10-06', 'Sorocaba', 'SP', '2023-04-01'),
+('André Monteiro', '444.666.888-00', 'andre.monteiro@email.com', '(12) 95432-5566', '1999-06-21', 'São José dos Campos', 'SP', '2023-04-03'),
+('Caroline Peixoto', '555.777.999-11', 'caroline.peixoto@email.com', '(24) 94321-6677', '1994-12-14', 'Volta Redonda', 'RJ', '2023-04-05'),
+('Igor Fonseca', '666.888.000-22', 'igor.fonseca@email.com', '(22) 93210-7788', '1987-05-31', 'Campos dos Goytacazes', 'RJ', '2023-04-08'),
+('Tatiana Corrêa', '777.999.111-33', 'tatiana.correa@email.com', '(32) 92109-8899', '1991-03-03', 'Juiz de Fora', 'MG', '2023-04-10'),
+('Samuel Andrade', '888.000.222-44', 'samuel.andrade@email.com', '(34) 91098-9900', '1996-09-25', 'Uberlândia', 'MG', '2023-04-12'),
+('Priscila Barros', '999.111.333-55', 'priscila.barros@email.com', '(35) 90987-0011', '1990-07-19', 'Poços de Caldas', 'MG', '2023-04-15'),
+('Caio Duarte', '000.222.444-66', 'caio.duarte@email.com', '(73) 99876-1122', '1993-01-08', 'Ilhéus', 'BA', '2023-04-18'),
+('Flávia Guimarães', '123.456.789-99', 'flavia.guimaraes@email.com', '(75) 98765-2233', '1989-04-17', 'Feira de Santana', 'BA', '2023-04-20'),
+('Renan Moreira', '234.567.890-88', 'renan.moreira@email.com', '(88) 97654-3344', '1995-08-02', 'Sobral', 'CE', '2023-04-22'),
+('Sabrina Antunes', '345.678.901-77', 'sabrina.antunes@email.com', '(82) 96543-4455', '1998-03-24', 'Arapiraca', 'AL', '2023-04-25'),
+('Victor Hugo', '456.789.012-66', 'victor.hugo@email.com', '(83) 95432-5566', '1991-11-15', 'Campina Grande', 'PB', '2023-04-28'),
+('Monique Viana', '567.890.123-55', 'monique.viana@email.com', '(87) 94321-6677', '1986-06-30', 'Petrolina', 'PE', '2023-05-01'),
+('Alexandre Pires', '678.901.234-44', 'alexandre.pires@email.com', '(84) 93210-7788', '1997-02-12', 'Mossoró', 'RN', '2023-05-03'),
+('Danielle Franco', '789.012.345-33', 'danielle.franco@email.com', '(79) 92109-8899', '1994-10-05', 'Lagarto', 'SE', '2023-05-05'),
+('Lucas Gabriel', '890.123.456-22', 'lucas.gabriel@email.com', '(47) 91098-9900', '1988-07-28', 'Blumenau', 'SC', '2023-05-08'),
+('Camila Pitanga', '901.234.567-11', 'camila.pitanga@email.com', '(48) 90987-0011', '1992-05-14', 'Criciúma', 'SC', '2023-05-10'),
+('Otávio Mesquita', '012.345.678-00', 'otavio.mesquita@email.com', '(54) 99876-1122', '1985-01-01', 'Caxias do Sul', 'RS', '2023-05-12'),
+('Bárbara Evans', '111.444.777-00', 'barbara.evans@email.com', '(55) 98765-3344', '1996-09-09', 'Santa Maria', 'RS', '2023-05-15'),
+('Douglas Costa', '222.555.888-11', 'douglas.costa@email.com', '(62) 97654-4455', '1990-12-18', 'Anápolis', 'GO', '2023-05-18'),
+('Evelyn Regly', '333.666.999-22', 'evelyn.regly@email.com', '(65) 96543-5566', '1993-08-22', 'Várzea Grande', 'MT', '2023-05-20'),
+('Fabricio Werdum', '444.777.000-33', 'fabricio.werdum@email.com', '(67) 95432-6677', '1987-04-10', 'Dourados', 'MS', '2023-05-22'),
+('Gisele Bündchen', '555.888.111-44', 'gisele.bundchen@email.com', '(91) 94321-7788', '1984-07-20', 'Ananindeua', 'PA', '2023-05-25'),
+('Helio Gracie', '666.999.222-55', 'helio.gracie@email.com', '(99) 93210-8899', '1991-03-17', 'Imperatriz', 'MA', '2023-05-28'),
+('Ingrid Guimarães', '777.000.333-66', 'ingrid.guimaraes@email.com', '(93) 92109-9900', '1998-11-04', 'Santarém', 'PA', '2023-06-01'),
+('Jair Rodrigues', '888.111.444-77', 'jair.rodrigues@email.com', '(94) 91098-0011', '1989-02-26', 'Marabá', 'PA', '2023-06-03'),
+('Kelly Key', '999.222.555-88', 'kelly.key@email.com', '(69) 90987-1122', '1995-06-12', 'Ji-Paraná', 'RO', '2023-06-05'),
+('Luan Santana', '000.333.666-99', 'luan.santana@email.com', '(68) 99876-2233', '1992-03-13', 'Cruzeiro do Sul', 'AC', '2023-06-08'),
+('Marta Vieira', '123.987.456-11', 'marta.vieira@email.com', '(92) 98765-3344', '1986-02-19', 'Parintins', 'AM', '2023-06-10'),
+('Neymar Junior', '234.876.543-22', 'neymar.junior@email.com', '(13) 97654-4455', '1992-02-05', 'Santos', 'SP', '2023-06-12'),
+('Oscar Niemeyer', '345.765.654-33', 'oscar.niemeyer@email.com', '(21) 96543-5566', '1985-12-15', 'Niterói', 'RJ', '2023-06-15'),
+('Paolla Oliveira', '456.654.765-44', 'paolla.oliveira@email.com', '(11) 95432-6677', '1987-04-14', 'Santo André', 'SP', '2023-06-18'),
+('Quirinopolis Silva', '567.543.876-55', 'quirino.silva@email.com', '(11) 94321-7788', '1994-08-30', 'São Bernardo do Campo', 'SP', '2023-06-20'),
+('Reynaldo Gianecchini', '678.432.987-66', 'reynaldo.g@email.com', '(16) 93210-8899', '1988-11-12', 'Birigui', 'SP', '2023-06-22'),
+('Sandy Leah', '789.321.098-77', 'sandy.leah@email.com', '(19) 92109-9900', '1989-01-28', 'Campinas', 'SP', '2023-06-25'),
+('Tirullipa Junior', '890.210.109-88', 'tirullipa.jr@email.com', '(85) 91098-0011', '1990-11-05', 'Caucaia', 'CE', '2023-06-28'),
+('Ullisses Guimarães', '901.109.210-99', 'ulisses.g@email.com', '(11) 90987-1122', '1984-10-06', 'Osasco', 'SP', '2023-07-01'),
+('Vivi Wanderley', '012.098.321-00', 'vivi.w@email.com', '(31) 99876-2233', '1996-04-18', 'Betim', 'MG', '2023-07-03'),
+('Whindersson Nunes', '112.233.445-56', 'whindersson.n@email.com', '(86) 98765-4455', '1995-01-05', 'Palmeirais', 'PI', '2023-07-05'),
+('Xuxa Meneghel', '223.344.556-67', 'xuxa.m@email.com', '(21) 97654-5566', '1985-03-27', 'Rio de Janeiro', 'RJ', '2023-07-08'),
+('Yudi Tamashiro', '334.455.667-78', 'yudi.t@email.com', '(11) 96543-6677', '1992-08-04', 'São Paulo', 'SP', '2023-07-10'),
+('Zeca Pagodinho', '445.566.778-89', 'zeca.p@email.com', '(21) 95432-7788', '1986-02-04', 'Duque de Caxias', 'RJ', '2023-07-12'),
+('Adriana Lima', '556.677.889-90', 'adriana.l@email.com', '(71) 94321-8899', '1987-06-12', 'Salvador', 'BA', '2023-07-15'),
+('Bento Ribeiro', '667.788.990-01', 'bento.r@email.com', '(21) 93210-9900', '1991-06-13', 'Petrópolis', 'RJ', '2023-07-18'),
+('Clara Moneke', '778.899.001-12', 'clara.m@email.com', '(21) 92109-0011', '1998-12-16', 'São Gonçalo', 'RJ', '2023-07-20'),
+('Dilsinho Silva', '889.900.112-23', 'dilsinho.s@email.com', '(21) 91098-1122', '1992-08-26', 'Rio de Janeiro', 'RJ', '2023-07-22'),
+('Eliana Michaelichen', '990.011.223-34', 'eliana.m@email.com', '(11) 90987-2233', '1983-11-22', 'São Paulo', 'SP', '2023-07-25'),
+('Fábio Porchat', '001.122.334-45', 'fabio.p@email.com', '(21) 99876-3344', '1983-07-01', 'Rio de Janeiro', 'RJ', '2023-07-28'),
+('Gloria Pires', '123.321.456-65', 'gloria.p@email.com', '(21) 98765-4455', '1983-08-23', 'Rio de Janeiro', 'RJ', '2023-08-01'),
+('Herson Capri', '234.432.567-76', 'herson.c@email.com', '(41) 97654-5566', '1985-11-08', 'Ponta Grossa', 'PR', '2023-08-03'),
+('Isis Valverde', '345.543.678-87', 'isis.v@email.com', '(31) 96543-6677', '1987-02-17', 'Aiuruoca', 'MG', '2023-08-05'),
+('João Gomes', '456.654.789-98', 'joao.g@email.com', '(87) 95432-7788', '2002-07-31', 'Serrita', 'PE', '2023-08-08'),
+('Klara Castanho', '567.765.890-09', 'klara.c@email.com', '(11) 94321-8899', '2000-10-06', 'Santo André', 'SP', '2023-08-10'),
+('Lázaro Ramos', '678.876.901-10', 'lazaro.r@email.com', '(71) 93210-9900', '1984-11-01', 'Salvador', 'BA', '2023-08-12'),
+('Maisa Silva', '789.987.012-21', 'maisa.s@email.com', '(11) 92109-0011', '2002-05-22', 'São Bernardo do Campo', 'SP', '2023-08-15'),
+('Nicolas Prattes', '890.098.123-32', 'nicolas.p@email.com', '(21) 91098-1122', '1997-05-04', 'Rio de Janeiro', 'RJ', '2023-08-18'),
+('Otávio Muller', '901.109.234-43', 'otavio.m@email.com', '(21) 90987-2233', '1985-08-06', 'Rio de Janeiro', 'RJ', '2023-08-20'),
+('Paloma Duarte', '012.210.345-54', 'paloma.d@email.com', '(21) 99876-3344', '1987-05-21', 'São Paulo', 'SP', '2023-08-22'),
+('Quitéria Chagas', '112.334.455-66', 'quiteria.c@email.com', '(21) 98765-5566', '1986-09-04', 'Rio de Janeiro', 'RJ', '2023-08-25'),
+('Rafa Kalimann', '223.445.566-77', 'rafa.k@email.com', '(62) 97654-6677', '1993-04-02', 'Campina Verde', 'MG', '2023-08-28'),
+('Selton Mello', '334.556.677-88', 'selton.m@email.com', '(31) 96543-7788', '1982-12-30', 'Passos', 'MG', '2023-09-01'),
+('Taís Araújo', '445.667.788-99', 'tais.a@email.com', '(21) 95432-8899', '1988-11-25', 'Rio de Janeiro', 'RJ', '2023-09-03'),
+('Umberto Magnani', '556.778.899-00', 'umberto.m@email.com', '(16) 94321-9900', '1984-04-25', 'Santa Cruz do Rio Pardo', 'SP', '2023-09-05'),
+('Vera Fischer', '667.889.900-11', 'vera.f@email.com', '(47) 93210-0011', '1985-11-27', 'Blumenau', 'SC', '2023-09-08'),
+('Wagner Moura', '778.990.011-22', 'wagner.m@email.com', '(71) 92109-1122', '1986-06-27', 'Salvador', 'BA', '2023-09-10'),
+('Xande de Pilares', '889.001.122-33', 'xande.p@email.com', '(21) 91098-2233', '1989-12-25', 'Rio de Janeiro', 'RJ', '2023-09-12'),
+('Yanna Lavigne', '990.112.233-44', 'yanna.l@email.com', '(11) 90987-3344', '1989-11-26', 'Osasco', 'SP', '2023-09-15'),
+('Zezé Polessa', '001.223.344-55', 'zeze.p@email.com', '(21) 99876-4455', '1983-09-22', 'Rio de Janeiro', 'RJ', '2023-09-18');
+
+INSERT INTO funcionario (nome, cpf, cargo, salario) VALUES
+('Adriano Silva', '10101010101', 'Analista de Sistemas', 5500.00),
+('Beatriz Mendes', '10101010102', 'Gerente de Projetos', 8700.50),
+('Caio Figueiredo', '10101010103', 'Desenvolvedor Backend', 6200.00),
+('Daniela Castro', '10101010104', 'Designer UX/UI', 4800.75),
+('Eduardo Paes', '10101010105', 'Administrador de Banco de Dados', 7900.00),
+('Fernanda Torres', '10101010106', 'Engenheira de Software', 9100.25),
+('Gabriel Medina', '10101010107', 'Scrum Master', 7300.00),
+('Heloísa Perissé', '10101010108', 'Analista de QA', 4200.00),
+('Igor Cavalera', '10101010109', 'Arquiteto de Soluções', 11500.00),
+('Juliana Paes', '10101010110', 'Coordenadora de TI', 8400.00),
+('Kléber Toledo', '10101010111', 'Desenvolvedor Frontend', 5800.00),
+('Luana Piovani', '10101010112', 'Analista de Dados', 5300.50),
+('Marcelo Adnet', '10101010113', 'Especialista em Segurança', 9800.00),
+('Nívea Maria', '10101010114', 'Diretora de Tecnologia', 16500.00),
+('Otávio Muller', '10101010115', 'Engenheiro DevOps', 8200.00),
+('Patrícia Pillar', '10101010116', 'Product Owner', 7600.00),
+('Quirino Neto', '10101010117', 'Suporte Técnico L1', 2500.00),
+('Renata Sorrah', '10101010118', 'Suporte Técnico L2', 3400.00),
+('Sérgio Malandro', '10101010119', 'Suporte Técnico L3', 4100.00),
+('Taís Fersoza', '10101010120', 'Analista de Suporte', 3200.00),
+('Umberto Carrão', '10101010121', 'Analista de Redes', 5100.00),
+('Vanessa Giácomo', '10101010122', 'Engenheira de Dados', 8900.00),
+('Wagner Santisteban', '10101010123', 'Desenvolvedor Fullstack', 6700.00),
+('Xavier de Oliveira', '10101010124', 'Consultor de TI', 9500.00),
+('Yuri Alberto', '10101010125', 'Estagiário de TI', 1800.00),
+('Zico de Souza', '10101010126', 'Gerente de Infraestrutura', 10800.00),
+('Alessandra Negrini', '10101010127', 'Analista Cloud', 7100.00),
+('Bento Ribeiro', '10101010128', 'Desenvolvedor Mobile', 6400.00),
+('Cássio Ramos', '10101010129', 'Analista de Negócios', 5900.00),
+('Débora Falabella', '10101010130', 'Gerente de Produtos', 9300.00),
+('Elaine Bast', '10101010131', 'Administradora de Redes', 6100.00),
+('Felipe Simas', '10101010132', 'Desenvolvedor Java', 6600.00),
+('Gisele Fróes', '10101010133', 'Desenvolvedora Python', 6800.00),
+('Herson Capri', '10101010134', 'Desenvolvedor C#', 6500.00),
+('Isabel Teixeira', '10101010135', 'Analista de BI', 5600.00),
+('Joaquim Lopes', '10101010136', 'Cientista de Dados', 10200.00),
+('Katiuscia Canoro', '10101010137', 'Especialista em AI', 12100.00),
+('Lúcio Mauro Filho', '10101010138', 'Desenvolvedor PHP', 5400.00),
+('Marisa Orth', '10101010139', 'Desenvolvedora React', 6300.00),
+('Nelson Freitas', '10101010140', 'Desenvolvedor Node', 6250.00),
+('Olívia Araújo', '10101010141', 'Engenheira de QA', 5700.00),
+('Paulo Betti', '10101010142', 'Gerente de Riscos', 10500.00),
+('Quésia Ramos', '10101010143', 'Auditor de TI', 8600.00),
+('Rainer Cadete', '10101010144', 'Analista de Governança', 6900.00),
+('Sthefany Brito', '10101010145', 'Analista de Processos', 4900.00),
+('Tarcísio Filho', '10101010146', 'Coordenador de Projetos', 7800.00),
+('Ulysses Cruz', '10101010147', 'Especialista em Scrum', 8100.00),
+('Viviane Araújo', '10101010148', 'Tech Lead', 11000.00),
+('Wellington Muniz', '10101010149', 'Líder Técnico', 10900.00),
+('Xênia França', '10101010150', 'Engenheira de ML', 11800.00),
+('Yasser de Lima', '10101010151', 'Analista de Compliance', 7400.00),
+('Zilú Camargo', '10101010152', 'Gerente de Operações', 11200.00),
+('Arlete Salles', '10101010153', 'Coordenadora de Operações', 8300.00),
+('Babu Santana', '10101010154', 'Analista de Telecom', 4700.00),
+('Cris Vianna', '10101010155', 'Especialista em Redes', 8800.00),
+('Dira Paes', '10101010156', 'Administradora de Sistemas', 7200.00),
+('Emílio Dantas', '10101010157', 'Analista de Requisitos', 4600.00),
+('Fabiula Nascimento', '10101010158', 'Desenhista Técnico', 3800.00),
+('Guilherme Weber', '10101010159', 'Especialista em ERP', 9400.00),
+('Helena Ranaldi', '10101010160', 'Consultora de Processos', 8500.00),
+('Ícaro Silva', '10101010161', 'Desenvolvedor Go', 7700.00),
+('Jéssica Ellen', '10101010162', 'Desenvolvedora Ruby', 7000.00),
+('Kiko Mascarenhas', '10101010163', 'Desenvolvedor Flutter', 6350.00),
+('Lidi Lisboa', '10101010164', 'Desenvolvedora Android', 6450.00),
+('Marcos Pasquim', '10101010165', 'Desenvolvedor iOS', 7250.00),
+('Natália Lage', '10101010166', 'Web Designer', 4300.00),
+('Orlando Brown', '10101010167', 'Ilustrador Digital', 3900.00),
+('Paloma Bernardi', '10101010168', 'Copywriter Técnico', 4400.00),
+('Quirino de Assis', '10101010169', 'Redator de Documentação', 4150.00),
+('Roberta Rodrigues', '10101010170', 'Especialista SEO', 5200.00),
+('Silvio Guindane', '10101010171', 'Analista de Marketing Digital', 4550.00),
+('Totia Meireles', '10101010172', 'Gerente de Contas TI', 9700.00),
+('Urbano Lacerda', '10101010173', 'Executivo de Vendas TI', 8950.00),
+('Vera Holtz', '10101010174', 'Diretora Comercial', 17500.00),
+('Walcyr Carrasco', '10101010175', 'Analista Financeiro TI', 5950.00),
+('Xuxa de Meneses', '10101010176', 'Gerente Financeira', 10300.00),
+('Yvan Zola', '10101010177', 'Analista de RH TI', 4850.00),
+('Zezé Motta', '10101010178', 'Gerente de RH', 9600.00),
+('Armando Babaioff', '10101010179', 'Recrutador Tech', 5150.00),
+('Bete Coelho', '10101010180', 'Headhunter Tech', 7350.00),
+('Cássia Kis', '10101010181', 'Analista de Treinamento', 4450.00),
+('Dalton Vigh', '10101010182', 'Instrutor Técnico', 5650.00),
+('Eliane Giardini', '10101010183', 'Coordenadora de Treinamento', 7550.00),
+('Fulvio Stefanini', '10101010184', 'Consultor Sênior', 11400.00),
+('Gracindo Júnior', '10101010185', 'Consultor Pleno', 7850.00),
+('Hélio de la Peña', '10101010186', 'Consultor Júnior', 4250.00),
+('Isabela Garcia', '10101010187', 'Analista de Testes', 4750.00),
+('Jackson Antunes', '10101010188', 'Tester Automotivo', 5350.00),
+('Katya Kinski', '10101010189', 'Tester Mobile', 4950.00),
+('Léo Jaime', '10101010190', 'Analista de Performance', 6850.00),
+('Malu Mader', '10101010191', 'Engenheira de Confiabilidade', 9950.00),
+('Nuno Leal Maia', '10101010192', 'Arquiteto de Banco de Dados', 11100.00),
+('Oscar Magrini', '10101010193', 'Analista de Storage', 6650.00),
+('Priscila Fantin', '10101010194', 'Analista de Virtualização', 6750.00),
+('Quirino Ribeiro', '10101010195', 'Especialista em Linux', 8450.00),
+('Rosamaria Murtinho', '10101010196', 'Especialista em Windows Server', 8350.00),
+('Stepan Nercessian', '10101010197', 'Analista de Mainframe', 9250.00),
+('Tássia Camargo', '10101010198', 'Engenheira de Firmware', 9050.00),
+('Umbelino Soares', '10101010199', 'Engenheiro de Hardware', 8750.00),
+('Victor Fasano', '10101010200', 'Diretor de Operações', 18200.00);
+
+INSERT INTO fornecedor (razao_social, nome_fantasia, cnpj, email, estado) VALUES
+('Tech Digital Ltda', 'Tech Digital', '10.000.000/0001-01', 'contato@techdigital.com', 'SP'),
+('Sistemas Globais S.A.', 'Global Sys', '10.000.000/0001-02', 'vendas@globalsys.com', 'RJ'),
+('Inova Solucoes e Tecnologia Ltda', 'Inova Tech', '10.000.000/0001-03', 'comercial@inovatech.com', 'MG'),
+('Alfa Distribuicao Eireli', 'Alfa Distribuidora', '10.000.000/0001-04', 'contato@alfadist.com', 'PR'),
+('Beta Comercio de Eletronicos Ltda', 'Beta Eletronicos', '10.000.000/0001-05', 'atendimento@betaeletro.com', 'RS'),
+('Gama Componentes Eletronicos S.A.', 'Gama Tech', '10.000.000/0001-06', 'vendas@gamatech.com', 'SC'),
+('Delta Games e Acessorios Ltda', 'Delta Games', '10.000.000/0001-07', 'contato@deltagames.com', 'SP'),
+('Epsilon Logistica e Suprimentos Ltda', 'Epsilon Log', '10.000.000/0001-08', 'comercial@epsilonlog.com', 'RJ'),
+('Zeta Importacao e Exportacao Eireli', 'Zeta Imports', '10.000.000/0001-09', 'sac@zetaimports.com', 'ES'),
+('Eta Servicos de Informatica Ltda', 'Eta Info', '10.000.000/0001-10', 'contato@etainfo.com', 'DF'),
+('Theta Distribuidora de Jogos S.A.', 'Theta Games', '10.000.000/0001-11', 'vendas@thetagames.com', 'SP'),
+('Iota Hardware e Software Ltda', 'Iota Hardware', '10.000.000/0001-12', 'suporte@iotahardware.com', 'MG'),
+('Kappa Telecomunicacoes Eireli', 'Kappa Telecom', '10.000.000/0001-13', 'contato@kappatel.com', 'BA'),
+('Lambda Comercio de Dispositivos Ltda', 'Lambda Tech', '10.000.000/0001-14', 'vendas@lambdatech.com', 'PE'),
+('Mu Representacoes Comerciais S.A.', 'Mu Reps', '10.000.000/0001-15', 'comercial@mureps.com', 'CE'),
+('Nu Suprimentos de Informatica Ltda', 'Nu Suprimentos', '10.000.000/0001-16', 'contato@nusuprimentos.com', 'GO'),
+('Xi Equipamentos de Audio e Video Eireli', 'Xi AV Store', '10.000.000/0001-17', 'vendas@xiavstore.com', 'SP'),
+('Omicron Tecnologia da Informacao Ltda', 'Omicron IT', '10.000.000/0001-18', 'atendimento@omicronit.com', 'RJ'),
+('Pi Comercio Digital S.A.', 'Pi Digital', '10.000.000/0001-19', 'contato@pidigital.com', 'PR'),
+('Rho Redes e Conectividade Ltda', 'Rho Redes', '10.000.000/0001-20', 'suporte@rhoredes.com', 'RS'),
+('Sigma Games e Consoles Eireli', 'Sigma Games', '10.000.000/0001-21', 'vendas@sigmagames.com', 'SC'),
+('Tau Distribuicao S.A.', 'Tau Dist', '10.000.000/0001-22', 'comercial@taudist.com', 'SP'),
+('Upsilon Solucoes em Ti Ltda', 'Upsilon IT', '10.000.000/0001-23', 'contato@upsilonit.com', 'MG'),
+('Phi Eletronicos do Brasil Eireli', 'Phi Brasil', '10.000.000/0001-24', 'vendas@phibrasil.com', 'RJ'),
+('Chi Comercio de Perifericos Ltda', 'Chi Perifericos', '10.000.000/0001-25', 'atendimento@chiperifericos.com', 'DF'),
+('Psi Solucoes Globais S.A.', 'Psi Globals', '10.000.000/0001-26', 'contato@psiglobals.com', 'BA'),
+('Omega Tecnologia e Comercio Ltda', 'Omega Tech', '10.000.000/0001-27', 'vendas@omegatech.com', 'SP'),
+('Apex Distribuidora Ltda', 'Apex Dist', '10.000.000/0001-28', 'comercial@apexdist.com', 'PR'),
+('Vortex Eletronicos Eireli', 'Vortex Store', '10.000.000/0001-29', 'contato@vortexstore.com', 'RS'),
+('Nexus Suprimentos Ltda', 'Nexus Tech', '10.000.000/0001-30', 'vendas@nexustech.com', 'SP'),
+('Prime Games do Brasil S.A.', 'Prime Games', '10.000.000/0001-31', 'contato@primegames.com', 'RJ'),
+('Master Componentes Eireli', 'Master Comp', '10.000.000/0001-32', 'vendas@mastercomp.com', 'MG'),
+('Mega Atacado de Eletronicos Ltda', 'Mega Eletronicos', '10.000.000/0001-33', 'comercial@megaeletro.com', 'CE'),
+('Ultra Hardware Ltda', 'Ultra Hardware', '10.000.000/0001-34', 'sac@ultrahardware.com', 'PE'),
+('Super Gaming Distribuicao S.A.', 'Super Gaming', '10.000.000/0001-35', 'vendas@supergaming.com', 'SP'),
+('Hyper Tecnologia Eireli', 'Hyper Tech', '10.000.000/0001-36', 'contato@hypertech.com', 'SC'),
+('Cyber Informatica Ltda', 'Cyber Store', '10.000.000/0001-37', 'vendas@cyberstore.com', 'PR'),
+('Matrix Solucoes Tech S.A.', 'Matrix Tech', '10.000.000/0001-38', 'comercial@matrixtech.com', 'RJ'),
+('Quantum Equipamentos Ltda', 'Quantum Eletronicos', '10.000.000/0001-39', 'contato@quantumeletro.com', 'SP'),
+('NEXUS Games e Midias Eireli', 'NEXUS Media', '10.000.000/0001-40', 'vendas@nexusmedia.com', 'MG'),
+('Pixel Comercio de Eletronicos Ltda', 'Pixel Store', '10.000.000/0001-41', 'contato@pixelstore.com', 'RS'),
+('Byte Informatica e Suprimentos S.A.', 'Byte Info', '10.000.000/0001-42', 'comercial@byteinfo.com', 'GO'),
+('Bit Distribuidora Eireli', 'Bit Dist', '10.000.000/0001-43', 'vendas@bitdist.com', 'ES'),
+('Core Hardware Ltda', 'Core Hardware', '10.000.000/0001-44', 'contato@corehardware.com', 'SP'),
+('Vector Logistica e Tecnologia S.A.', 'Vector Log', '10.000.000/0001-45', 'vendas@vectorlog.com', 'RJ'),
+('Pro Games Distribuidora Ltda', 'Pro Games', '10.000.000/0001-46', 'comercial@progames.com', 'PR'),
+('Maximus Importacoes Eireli', 'Maximus Imports', '10.000.000/0001-47', 'sac@maximusimports.com', 'SC'),
+('Logic Sistemas e Hardware Ltda', 'Logic Hardware', '10.000.000/0001-48', 'contato@logichardware.com', 'SP'),
+('Synapse Tecnologia S.A.', 'Synapse Tech', '10.000.000/0001-49', 'vendas@synapsetech.com', 'MG'),
+('Dynamic Eletronicos Ltda', 'Dynamic Eletro', '10.000.000/0001-50', 'comercial@dynamiceletro.com', 'DF'),
+('Fusion Games Eireli', 'Fusion Games', '10.000.000/0001-51', 'vendas@fusiongames.com', 'BA'),
+('Horizon Comercio Importacao Ltda', 'Horizon Tech', '10.000.000/0001-52', 'contato@horizontech.com', 'PE'),
+('Starlight Digital S.A.', 'Starlight Digital', '10.000.000/0001-53', 'vendas@starlightdigital.com', 'CE'),
+('Aura Informatica Ltda', 'Aura Info', '10.000.000/0001-54', 'comercial@aurainfo.com', 'SP'),
+('Zenith Comercio de Acessorios Eireli', 'Zenith Games', '10.000.000/0001-55', 'contato@zenithgames.com', 'RJ'),
+('Vanguard Solucoes Tecnologicas Ltda', 'Vanguard Tech', '10.000.000/0001-56', 'vendas@vanguardtech.com', 'PR'),
+('Pinnacle Distribuidora S.A.', 'Pinnacle Dist', '10.000.000/0001-57', 'comercial@pinnacledist.com', 'RS'),
+('Summit Acessorios e Perifericos Eireli', 'Summit Tech', '10.000.000/0001-58', 'contato@summittech.com', 'SC'),
+('Evolute Comercio Eletronico Ltda', 'Evolute Games', '10.000.000/0001-59', 'vendas@evolutegames.com', 'SP'),
+('Next Gen Distribuicao S.A.', 'Next Gen Games', '10.000.000/0001-60', 'comercial@nextgengames.com', 'MG'),
+('Orbit Tecnologia Ltda', 'Orbit Tech', '10.000.000/0001-61', 'contato@orbittech.com', 'GO'),
+('Cosmos Suprimentos Eireli', 'Cosmos Tech', '10.000.000/0001-62', 'vendas@cosmostech.com', 'ES'),
+('Nova Era Games Ltda', 'Nova Era Games', '10.000.000/0001-63', 'sac@novaeragames.com', 'SP'),
+('Aero Hardware e Servicos S.A.', 'Aero Hardware', '10.000.000/0001-64', 'comercial@aerohardware.com', 'RJ'),
+('Atlas Importadora e Distribuidora Ltda', 'Atlas Dist', '10.000.000/0001-65', 'contato@atlasdist.com', 'DF'),
+('Titan Eletronicos Eireli', 'Titan Eletronicos', '10.000.000/0001-66', 'vendas@titaneletro.com', 'BA'),
+('Olympus Games Ltda', 'Olympus Store', '10.000.000/0001-67', 'comercial@olympusstore.com', 'PE'),
+('Phoenix Tecnologia S.A.', 'Phoenix Tech', '10.000.000/0001-68', 'contato@phoenixtech.com', 'CE'),
+('Griffin Comercio de Jogos Ltda', 'Griffin Games', '10.000.000/0001-69', 'vendas@griffingames.com', 'SP'),
+('Hydra Suprimentos Eireli', 'Hydra Tech', '10.000.000/0001-70', 'sac@hydratech.com', 'PR'),
+('Centaur Hardware Ltda', 'Centaur Comp', '10.000.000/0001-71', 'comercial@centaurcomp.com', 'RS'),
+('Pegasus Distribuidora S.A.', 'Pegasus Dist', '10.000.000/0001-72', 'vendas@pegasusdist.com', 'SC'),
+('KRAKEN Gaming Ltda', 'Kraken Games', '10.000.000/0001-73', 'contato@krakengames.com', 'SP'),
+('Leviathan Comercio Eireli', 'Leviathan Tech', '10.000.000/0001-74', 'vendas@leviathantech.com', 'MG'),
+('Valkyrie Perifericos Ltda', 'Valkyrie Store', '10.000.000/0001-75', 'comercial@valkyriestore.com', 'RJ'),
+('Spartan Eletronicos S.A.', 'Spartan Tech', '10.000.000/0001-76', 'contato@spartantech.com', 'ES'),
+('Trojan Equipamentos Eireli', 'Trojan Hardware', '10.000.000/0001-77', 'vendas@trojanhardware.com', 'GO'),
+('Viking Gaming Ltda', 'Viking Store', '10.000.000/0001-78', 'sac@vikingstore.com', 'SP'),
+('Samurai Informatica S.A.', 'Samurai Tech', '10.000.000/0001-79', 'comercial@samuraitech.com', 'PR'),
+('Ninja Comercio de Eletronicos Ltda', 'Ninja Express', '10.000.000/0001-80', 'vendas@ninjaexpress.com', 'RS'),
+('Ronin Games Eireli', 'Ronin Games', '10.000.000/0001-81', 'contato@roningames.com', 'SC'),
+('Shogun Tecnologia Ltda', 'Shogun Tech', '10.000.000/0001-82', 'vendas@shoguntech.com', 'DF'),
+('Dynasty Distribuidora S.A.', 'Dynasty Dist', '10.000.000/0001-83', 'comercial@dynastydist.com', 'BA'),
+('Empire Gaming Ltda', 'Empire Store', '10.000.000/0001-84', 'contato@empirestore.com', 'PE'),
+('Kingdom Comercio Eireli', 'Kingdom Tech', '10.000.000/0001-85', 'vendas@kingdomtech.com', 'CE'),
+('Monarch Eletronicos Ltda', 'Monarch Eletro', '10.000.000/0001-86', 'comercial@monarcheletro.com', 'SP'),
+('Sovereign Perifericos S.A.', 'Sovereign Games', '10.000.000/0001-87', 'contato@sovereigngames.com', 'MG'),
+('Crown Hardware Ltda', 'Crown Hardware', '10.000.000/0001-88', 'vendas@crownhardware.com', 'RJ'),
+('Royal Games Eireli', 'Royal Games', '10.000.000/0001-89', 'sac@royalgames.com', 'SP'),
+('Imperial Suprimentos Ltda', 'Imperial Tech', '10.000.000/0001-90', 'comercial@imperialtech.com', 'PR'),
+('Majesty Eletronicos S.A.', 'Majesty Store', '10.000.000/0001-91', 'vendas@majestystore.com', 'RS'),
+('Supreme Distribuidora Ltda', 'Supreme Dist', '10.000.000/0001-92', 'contato@supremedist.com', 'SC'),
+('Elite Gaming Eireli', 'Elite Games', '10.000.000/0001-93', 'vendas@elitegames.com', 'GO'),
+('Vip Hardware Ltda', 'Vip Hardware', '10.000.000/0001-94', 'comercial@viphardware.com', 'ES'),
+('Select Tecnologia S.A.', 'Select Tech', '10.000.000/0001-95', 'contato@selecttech.com', 'SP'),
+('Choice Eletronicos Ltda', 'Choice Store', '10.000.000/0001-96', 'vendas@choicestore.com', 'RJ'),
+('Optima Suprimentos Eireli', 'Optima Tech', '10.000.000/0001-97', 'sac@optimatech.com', 'DF'),
+('Ideal Perifericos Ltda', 'Ideal Games', '10.000.000/0001-98', 'comercial@idealgames.com', 'BA'),
+('Perfect Hardware S.A.', 'Perfect Hardware', '10.000.000/0001-99', 'vendas@perfecthardware.com', 'MG'),
+('Ultimate Gaming Ltda', 'Ultimate Games', '10.000.000/0002-00', 'contato@ultimategames.com', 'SP');
+
+INSERT INTO produto (id_categoria, id_fornecedor, nome, descricao, preco, custo, codigo_barras, marca, modelo, data_cadastro) VALUES
+(1, 1, 'Notebook Pro 15', 'Notebook alta performance i7 16GB SSD 512GB', 4500.00, 3100.00, '7891000000001', 'TechBrand', 'PRO-15', '2023-01-10'),
+(1, 2, 'Smartphone X20', 'Smartphone Tela 6.5 128GB Câmera Tripla', 2200.00, 1450.00, '7891000000002', 'MobileMax', 'X20-2023', '2023-01-12'),
+(2, 3, 'Monitor UltraWide 29', 'Monitor IPS 75Hz Full HD HDMI', 1200.00, 820.00, '7891000000003', 'ViewTech', 'UW-29P', '2023-01-15'),
+(2, 4, 'Teclado Mecânico RGB', 'Teclado Switch Blue ABNT2 Iluminado', 350.00, 190.00, '7891000000004', 'KeyMaster', 'KM-RGB1', '2023-01-18'),
+(3, 5, 'Mouse Gamer 16000 DPI', 'Mouse óptico com ajuste de peso e macros', 250.00, 125.00, '7891000000005', 'KeyMaster', 'MG-16K', '2023-01-20'),
+(3, 6, 'Cadeira Ergonômica Executive', 'Cadeira com apoio lombar e braços 3D', 1100.00, 720.00, '7891000000006', 'OfficePro', 'EXE-300', '2023-01-22'),
+(4, 7, 'Mesa de Escritório L', 'Mesa em MDF com suporte para CPU', 650.00, 390.00, '7891000000007', 'OfficePro', 'DESK-L1', '2023-01-25'),
+(4, 8, 'Impressora Multifuncional Tanque', 'Impressora jato de tinta Wi-Fi bivolt', 1350.00, 940.00, '7891000000008', 'PrintFast', 'TANK-500', '2023-01-28'),
+(5, 9, 'Headset 7.1 Surround', 'Headset com microfone antirruído e USB', 400.00, 230.00, '7891000000009', 'AudioCore', 'HS-71', '2023-02-01'),
+(5, 10, 'Caixa de Som Bluetooth 20W', 'Caixa portátil à prova dágua IPX7', 300.00, 175.00, '7891000000010', 'AudioCore', 'BT-W20', '2023-02-03'),
+(6, 11, 'HD Externo 2TB USB 3.0', 'Disco rígido externo portátil preto', 480.00, 315.00, '7891000000011', 'DataStore', 'HDEXT-2T', '2023-02-05'),
+(6, 12, 'SSD NVMe 1TB M.2', 'SSD leitura 3500MB/s gravação 3000MB/s', 550.00, 360.00, '7891000000012', 'DataStore', 'NVME-1000', '2023-02-08'),
+(7, 13, 'Roteador Wi-Fi 6 Mesh', 'Gigabit dual band 1800Mbps cobertura ampla', 420.00, 265.00, '7891000000013', 'NetLink', 'WIFI6-M', '2023-02-10'),
+(7, 14, 'Switch Gigabit 16 Portas', 'Switch rackável caixa metálica plug and play', 680.00, 430.00, '7891000000014', 'NetLink', 'SW-16G', '2023-02-12'),
+(8, 15, 'Nobreak 1200VA Bivolt', 'Nobreak senoidal com 6 tomadas', 890.00, 580.00, '7891000000015', 'PowerSafe', 'NB-1200', '2023-02-15'),
+(8, 16, 'Filtro de Linha 8 Tomadas', 'Protetor contra surtos elétricos fusível', 85.00, 42.00, '7891000000016', 'PowerSafe', 'FL-8T', '2023-02-18'),
+(9, 17, 'Webcam Full HD 1080p', 'Webcam com microfone duplo e foco automático', 280.00, 185.00, '7891000000017', 'ViewTech', 'WC-1080', '2023-02-20'),
+(9, 18, 'Microfone Condensador USB', 'Microfone com filtro pop e tripé para podcast', 320.00, 195.00, '7891000000018', 'AudioCore', 'MIC-USB1', '2023-02-22'),
+(10, 19, 'Tablet 10 Polegadas 64GB', 'Tablet Octa-Core Android 12 Wi-Fi', 950.00, 610.00, '7891000000019', 'MobileMax', 'TAB-10', '2023-02-25'),
+(10, 20, 'Smartwatch Fitness Sport', 'Relógio com oxímetro GPS e freq cardiaco', 380.00, 210.00, '7891000000020', 'MobileMax', 'SW-SPORT', '2023-02-28'),
+(1, 21, 'Placa de Vídeo RTX 3060 12GB', 'GPU GDDR6 Ray Tracing DLSS', 2400.00, 1720.00, '7891000000021', 'TechBrand', 'RTX-3060', '2023-03-01'),
+(1, 22, 'Processador Octa Core 4.5GHz', 'Processador LGA 1700 com cooler', 1600.00, 1150.00, '7891000000022', 'TechBrand', 'CPU-8C', '2023-03-03'),
+(2, 23, 'Placa Mãe B550 DDR4', 'Placa mãe ATX com M.2 e RGB', 920.00, 630.00, '7891000000023', 'TechBrand', 'MB-B550', '2023-03-05'),
+(2, 24, 'Memória RAM 16GB DDR4 3200MHz', 'Pente único dissiptador de calor', 310.00, 180.00, '7891000000024', 'DataStore', 'RAM-16D4', '2023-03-08'),
+(3, 25, 'Fonte ATX 650W 80 Plus Bronze', 'Fonte semi-modular com PFC ativo', 450.00, 285.00, '7891000000025', 'PowerSafe', 'PS-650W', '2023-03-10'),
+(3, 26, 'Gabinete Mid Tower Vidro', 'Gabinete gamer com 4 fans RGB inclusos', 380.00, 225.00, '7891000000026', 'KeyMaster', 'CAB-GT1', '2023-03-12'),
+(4, 27, 'Water Cooler 240mm RGB', 'Refrigeração líquida para CPU com 2 fans', 490.00, 310.00, '7891000000027', 'TechBrand', 'WC-240', '2023-03-15'),
+(4, 28, 'Cooler para CPU Dual Fan', 'Air cooler silencioso 4 heatpipes', 180.00, 98.00, '7891000000028', 'TechBrand', 'AC-DF1', '2023-03-18'),
+(5, 29, 'Suporte Duplo para Monitores', 'Suporte a gás pistão 17 a 32 polegadas', 290.00, 160.00, '7891000000029', 'OfficePro', 'SUP-2M', '2023-03-20'),
+(5, 30, 'Mousepad Extra Grande 90x40', 'Mousepad costurado impermeável gamer', 90.00, 45.00, '7891000000030', 'KeyMaster', 'MP-9040', '2023-03-22'),
+(6, 31, 'Hub USB-C 7 em 1 HDMI', 'Adaptador USB-C com leitor SD e Ethernet', 210.00, 115.00, '7891000000031', 'NetLink', 'HUB-C7', '2023-03-25'),
+(6, 32, 'Cabo HDMI 2.1 4K 120Hz 2m', 'Cabo blindado de alta velocidade', 65.00, 28.00, '7891000000032', 'NetLink', 'CB-HDMI21', '2023-03-28'),
+(7, 33, 'Pendrive 128GB USB 3.2', 'Pendrive metálico compacto', 95.00, 48.00, '7891000000033', 'DataStore', 'PD-128G', '2023-04-01'),
+(7, 34, 'Cartão de Memória MicroSD 256GB', 'Cartão classe 10 V30 para 4K', 160.00, 89.00, '7891000000034', 'DataStore', 'SD-256G', '2023-04-03'),
+(8, 35, 'Leitor de Código de Barras Laser', 'Leitor portátil USB com suporte', 170.00, 92.00, '7891000000035', 'PrintFast', 'SCAN-BAR', '2023-04-05'),
+(8, 36, 'Impressora Térmica Não Fiscal', 'Impressora de cupons 80mm USB Ethernet', 580.00, 370.00, '7891000000036', 'PrintFast', 'TP-80MM', '2023-04-08'),
+(9, 37, 'Fragmentadora de Papel 10 Folhas', 'Fragmentadora em partículas com cesto', 410.00, 245.00, '7891000000037', 'OfficePro', 'SHRED-10', '2023-04-10'),
+(9, 38, 'Plaminadora A4 Térmica', 'Laminadora de documentos com refiladora', 220.00, 128.00, '7891000000038', 'OfficePro', 'LAM-A4', '2023-04-12'),
+(10, 39, 'Projetor Full HD 4000 Lumens', 'Projetor com conexão Wi-Fi e alto-falante', 1850.00, 1280.00, '7891000000039', 'ViewTech', 'PJ-4000', '2023-04-15'),
+(10, 40, 'Tela de Projeção Retrátil 100', 'Tela com tripé e estojo de proteção', 430.00, 255.00, '7891000000040', 'ViewTech', 'SCR-100', '2023-04-18'),
+(1, 41, 'Caixa de Som Soundbar 100W', 'Soundbar 2.1 com Subwoofer Bluetooth', 690.00, 420.00, '7891000000041', 'AudioCore', 'SB-100W', '2023-04-20'),
+(1, 42, 'Fone TWS Bluetooth In-Ear', 'Fone sem fio com cancelamento de ruído', 270.00, 140.00, '7891000000042', 'AudioCore', 'TWS-AIR', '2023-04-22'),
+(2, 43, 'Carregador por Indução 15W', 'Base de carregamento rápido sem fio', 130.00, 68.00, '7891000000043', 'MobileMax', 'CHG-15W', '2023-04-25'),
+(2, 44, 'Power Bank 20000mAh', 'Bateria externa com saída tipo C e USB-A', 190.00, 105.00, '7891000000044', 'MobileMax', 'PB-20K', '2023-04-28'),
+(3, 45, 'Suporte Portátil para Notebook', 'Suporte em alumínio dobrável e ajustável', 85.00, 38.00, '7891000000045', 'OfficePro', 'SUP-NB1', '2023-05-01'),
+(3, 46, 'Organizador de Cabos de Mesa', 'Kit com presilhas e organizadores de silicone', 35.00, 12.00, '7891000000046', 'OfficePro', 'ORG-CAB', '2023-05-03'),
+(4, 47, 'Luminária de Mesa LED USB', 'Luminária articulável com controle de brilho', 110.00, 55.00, '7891000000047', 'OfficePro', 'LUM-LED', '2023-05-05'),
+(4, 48, 'Fita LED RGB 5 Metros', 'Fita inteligente com controle por aplicativo', 140.00, 72.00, '7891000000048', 'ViewTech', 'LED-RGB5', '2023-05-08'),
+(5, 49, 'Câmera de Segurança Wi-Fi 360', 'Câmera interna HD visão noturna', 230.00, 135.00, '7891000000049', 'NetLink', 'CAM-360', '2023-05-10'),
+(5, 50, 'Fechadura Digital Biométrica', 'Fechadura eletrônica para porta de madeira', 820.00, 520.00, '7891000000050', 'PowerSafe', 'LOCK-BIO', '2023-05-12'),
+(6, 51, 'Sensor de Presença Inteligente', 'Sensor Wi-Fi compatível com assistentes de voz', 115.00, 60.00, '7891000000051', 'NetLink', 'SENS-PRES', '2023-05-15'),
+(6, 52, 'Tomada Inteligente Wi-Fi 16A', 'Plug com medição de consumo de energia', 75.00, 34.00, '7891000000052', 'PowerSafe', 'PLUG-SMART', '2023-05-18'),
+(7, 53, 'Assistente Virtual com Tela 7', 'Smart display com controle de automação', 640.00, 415.00, '7891000000053', 'MobileMax', 'DISP-SMART', '2023-05-20'),
+(7, 54, 'Lâmpada Inteligente RGB E27', 'Lâmpada Wi-Fi 9W com 16 milhões de cores', 55.00, 24.00, '7891000000054', 'ViewTech', 'LAMP-RGB', '2023-05-22'),
+(8, 55, 'Robô Aspirador de Pó Smart', 'Aspirador com sensor antiqueda e varredura', 1250.00, 810.00, '7891000000055', 'MobileMax', 'ROB-VAC', '2023-05-25'),
+(8, 56, 'Umidificador de Ar Ultrassônico', 'Umidificador 4L silencioso com difusor', 170.00, 87.00, '7891000000056', 'OfficePro', 'UMID-4L', '2023-05-28'),
+(9, 57, 'Ventilador de Mesa USB 20cm', 'Ventilador compacto e silencioso', 65.00, 39.00, '7891000000057', 'OfficePro', 'VENT-USB', '2023-06-01'),
+(9, 58, 'Aquecedor Elétrico Portátil', 'Aquecedor cerâmico com termostato', 185.00, 99.00, '7891000000058', 'PowerSafe', 'AQUEC-PORT', '2023-06-03'),
+(10, 59, 'Balança Digital de Precisão', 'Balança de cozinha até 10kg', 45.00, 18.00, '7891000000059', 'OfficePro', 'BAL-PREC', '2023-06-05'),
+(10, 60, 'Mochila Impermeável para Notebook', 'Mochila com compartimento acolchoado USB', 195.00, 95.00, '7891000000060', 'OfficePro', 'BAG-NB15', '2023-06-08'),
+(1, 61, 'Maleta Rígida para Ferramentas', 'Maleta em alumínio com divisórias', 240.00, 130.00, '7891000000061', 'OfficePro', 'CASE-TOOL', '2023-06-10'),
+(1, 62, 'Parafusadeira Elétrica Bateria 12V', 'Kit com pontas de chave e carregador', 280.00, 155.00, '7891000000062', 'PowerSafe', 'PARAF-12V', '2023-06-12'),
+(2, 63, 'Jogo de Chaves de Fenda 12 Pçs', 'Chaves em aço cromo vanádio com cabo ergonômico', 110.00, 52.00, '7891000000063', 'PowerSafe', 'KIT-CHAVE', '2023-06-15'),
+(2, 64, 'Multímetro Digital Profissional', 'Testador elétrico com bip sonoro e display', 135.00, 67.00, '7891000000064', 'PowerSafe', 'MULT-DIG', '2023-06-18'),
+(3, 65, 'Alicate Crimpador de Cabos RJ45', 'Alicate para conector de rede e decapador', 75.00, 36.00, '7891000000065', 'NetLink', 'ALIC-RJ45', '2023-06-20'),
+(3, 66, 'Testador de Cabos de Rede RJ45', 'Localizador e testador de continuidade', 60.00, 27.00, '7891000000066', 'NetLink', 'TEST-CABO', '2023-06-22'),
+(4, 67, 'Passador de Slides a Laser', 'Apresentador sem fio 2.4GHz com recepção USB', 90.00, 41.00, '7891000000067', 'KeyMaster', 'PASS-SLIDE', '2023-06-25'),
+(4, 68, 'Mesa Digitalizadora A6', 'Caneta sem bateria 8192 níveis de pressão', 340.00, 198.00, '7891000000068', 'ViewTech', 'TAB-DIG', '2023-06-28'),
+(5, 69, 'Calculadora Científica 240 Funções', 'Display duplo 2 linhas com tampa de proteção', 65.00, 26.00, '7891000000069', 'OfficePro', 'CALC-CIENT', '2023-07-01'),
+(5, 70, 'Calculadora com Impressora Térmica', 'Calculadora de mesa 12 dígitos com bobina', 390.00, 235.00, '7891000000070', 'PrintFast', 'CALC-IMP', '2023-07-03'),
+(6, 71, 'Cofre Eletrônico Digital', 'Cofre em aço reforçado com senha e chave', 360.00, 205.00, '7891000000071', 'PowerSafe', 'COFRE-DIG', '2023-07-05'),
+(6, 72, 'Detector de Notas Falsas UV', 'Lâmpada ultravioleta para teste de cédulas', 115.00, 58.00, '7891000000072', 'PrintFast', 'DETEC-UV', '2023-07-08'),
+(7, 73, 'Contadora de Cédulas Automática', 'Contadora de dinheiro com detecção de notas', 1290.00, 840.00, '7891000000073', 'PrintFast', 'COUNT-CED', '2023-07-10'),
+(7, 74, 'Relógio de Ponto Cartográfico', 'Relógio de ponto eletrônico com biometria', 890.00, 560.00, '7891000000074', 'PrintFast', 'PONTO-BIO', '2023-07-12'),
+(8, 75, 'Crachá de Proximidade RFID 100 Pçs', 'Cartões em PVC para controle de acesso', 150.00, 70.00, '7891000000075', 'NetLink', 'KIT-RFID', '2023-07-15'),
+(8, 76, 'Cordão para Crachá 50 Unidades', 'Cordões com engate rápido e jacaré', 70.00, 25.00, '7891000000076', 'OfficePro', 'CORD-CRAC', '2023-07-18'),
+(9, 77, 'Porta Crachá Retrátil Roller 50 Un', 'Roller clip em ABS com mola interna', 85.00, 32.00, '7891000000077', 'OfficePro', 'ROLL-CLIP', '2023-07-20'),
+(9, 78, 'Guilhotina para Papel A4', 'Cortadora de papel manual base em aço', 140.00, 78.00, '7891000000078', 'OfficePro', 'GUILH-A4', '2023-07-22'),
+(10, 79, 'Encadernadora de Espiral', 'Perfuradora manual até 15 folhas por vez', 390.00, 220.00, '7891000000079', 'OfficePro', 'ENCAD-ESP', '2023-07-25'),
+(10, 80, 'Capa para Encadernação A4 100 Un', 'Capas em PP transparente e preta', 65.00, 29.00, '7891000000080', 'OfficePro', 'CAPA-ENC', '2023-07-28'),
+(1, 81, 'Espiral para Encadernação 12mm 100Un', 'Espiral preto para até 70 folhas', 35.00, 14.00, '7891000000081', 'OfficePro', 'ESP-12MM', '2023-08-01'),
+(1, 82, 'Papel A4 Sulfite 75g Caixa 10 Reams', 'Caixa com 5000 folhas brancas', 260.00, 165.00, '7891000000082', 'OfficePro', 'PAPEL-A4CX', '2023-08-03'),
+(2, 83, 'Papel Fotográfico Glossy A4 100 Folhas', 'Papel alto brilho prova dágua 180g', 75.00, 33.00, '7891000000083', 'PrintFast', 'PAPEL-FOTO', '2023-08-05'),
+(2, 84, 'Etiqueta Adesiva A4 100 Folhas', 'Etiquetas brancas para impressoras', 85.00, 40.00, '7891000000084', 'PrintFast', 'ETIQ-A4', '2023-08-08'),
+(3, 85, 'Tinta para Impressora Refil 500ml', 'Kit 4 cores CMYK para tanque de tinta', 160.00, 82.00, '7891000000085', 'PrintFast', 'TINT-CMYK', '2023-08-10'),
+(3, 86, 'Toner Preto de Alto Rendimento', 'Toner compatível para 2500 páginas', 110.00, 46.00, '7891000000086', 'PrintFast', 'TONER-BK', '2023-08-12'),
+(4, 87, 'Cartucho de Tinta Preto XL', 'Cartucho original de alta capacidade', 145.00, 88.00, '7891000000087', 'PrintFast', 'CART-BKXL', '2023-08-15'),
+(4, 88, 'Cartucho de Tinta Colorido XL', 'Cartucho original tricolor', 155.00, 94.00, '7891000000088', 'PrintFast', 'CART-COLXL', '2023-08-18'),
+(5, 89, 'Fita para Rotulador Eletrônico 12mm', 'Fita laminada texto preto fundo branco', 55.00, 22.00, '7891000000089', 'PrintFast', 'FITA-ROT', '2023-08-20'),
+(5, 90, 'Rotulador Eletrônico Portátil', 'Impressor de etiquetas com teclado QWERTY', 290.00, 168.00, '7891000000090', 'PrintFast', 'ROTUL-PORT', '2023-08-22'),
+(6, 91, 'Suporte Ergonômico para os Pés', 'Apoio de pé com regulagem de inclinação', 120.00, 59.00, '7891000000091', 'OfficePro', 'SUP-PES', '2023-08-25'),
+(6, 92, 'Almofada Ergonômica Assento', 'Almofada em espuma de memória com gel', 135.00, 66.00, '7891000000092', 'OfficePro', 'ALM-MEM', '2023-08-28'),
+(7, 93, 'Apoio de Pulso em Gel para Teclado', 'Base antiderrapante ergonômica', 60.00, 23.00, '7891000000093', 'KeyMaster', 'AP-PULSOTEC', '2023-09-01'),
+(7, 94, 'Apoio de Pulso em Gel para Mousepad', 'Mousepad com apoio macio para pulso', 45.00, 17.00, '7891000000094', 'KeyMaster', 'AP-PULSOMOU', '2023-09-03'),
+(8, 95, 'Lixeira Inox com Pedal 12L', 'Lixeira com balde interno removível', 140.00, 76.00, '7891000000095', 'OfficePro', 'LIX-12L', '2023-09-05'),
+(8, 96, 'Dispenser de Álcool em Gel Automático', 'Sensor de presença para parede ou mesa', 110.00, 51.00, '7891000000096', 'OfficePro', 'DISP-GEL', '2023-09-08'),
+(9, 97, 'Purificador de Ar Hepa', 'Purificador com filtro contra poeira e odores', 580.00, 365.00, '7891000000097', 'OfficePro', 'PUR-HEPA', '2023-09-10'),
+(9, 98, 'Termômetro Digital Infravermelho', 'Medição de temperatura sem contato', 95.00, 43.00, '7891000000098', 'PowerSafe', 'TERM-INFRA', '2023-09-12'),
+(10, 99, 'Oxímetro de Pulso Digital', 'Medidor de saturação de oxigênio e pulso', 85.00, 37.00, '7891000000099', 'PowerSafe', 'OXIM-DIG', '2023-09-15'),
+(10, 100, 'Kit de Primeiros Socorros Completo', 'Estojo com gazes, ataduras, tesoura e insumos', 130.00, 62.00, '7891000000100', 'OfficePro', 'KIT-SOCORRO', '2023-09-18');
+
+INSERT INTO categoria (nome, descricao) VALUES
+('Informática e Hardware', 'Componentes de computador, peças, processadores e placas'),
+('Periféricos e Acessórios', 'Teclados, mouses, monitores e acessórios para desktop'),
+('Móveis e Ergonomia', 'Cadeiras ergonômicas, mesas de escritório e apoios de postura'),
+('Impressão e Suprimentos', 'Impressoras, multifuncionais, toners, tintas e papéis'),
+('Áudio e Vídeo', 'Headsets, caixas de som, microfones, webcams e projetores'),
+('Armazenamento e Conectividade', 'SSDs, HDs externos, pendrives, cabos e hubs USB'),
+('Redes e Segurança', 'Roteadores, switches, câmeras de segurança e fechaduras digitais'),
+('Energia e Proteção', 'Nobreaks, filtros de linha, tomadas inteligentes e baterias'),
+('Equipamentos de Escritório', 'Fragmentadoras, laminadoras, calculadoras e cofres'),
+('Dispositivos Móveis e Automação', 'Smartphones, tablets, smartwatches e itens para casa inteligente');
+
+INSERT INTO estoque (id_produto, id_fornecedor, quantidade, estoque_minimo, ultima_atualizacao) VALUES
+(1, 1, 45, 10, '2023-09-20 08:30:00'),
+(2, 2, 12, 5, '2023-09-20 09:15:00'),
+(3, 3, 28, 8, '2023-09-20 10:00:00'),
+(4, 4, 85, 15, '2023-09-20 11:20:00'),
+(5, 5, 60, 10, '2023-09-20 11:45:00'),
+(6, 6, 8, 10, '2023-09-21 09:00:00'),
+(7, 7, 15, 5, '2023-09-21 09:30:00'),
+(8, 8, 22, 5, '2023-09-21 10:10:00'),
+(9, 9, 34, 10, '2023-09-21 14:00:00'),
+(10, 10, 50, 12, '2023-09-21 15:30:00'),
+(11, 11, 40, 8, '2023-09-22 08:45:00'),
+(12, 12, 75, 15, '2023-09-22 09:10:00'),
+(13, 13, 18, 5, '2023-09-22 10:25:00'),
+(14, 14, 9, 10, '2023-09-22 11:00:00'),
+(15, 15, 14, 5, '2023-09-22 13:40:00'),
+(16, 16, 120, 20, '2023-09-22 14:15:00'),
+(17, 17, 29, 8, '2023-09-22 16:00:00'),
+(18, 18, 16, 5, '2023-09-23 09:00:00'),
+(19, 19, 23, 6, '2023-09-23 10:30:00'),
+(20, 20, 31, 10, '2023-09-23 11:15:00'),
+(21, 21, 7, 5, '2023-09-23 14:00:00'),
+(22, 22, 11, 5, '2023-09-23 15:20:00'),
+(23, 23, 19, 5, '2023-09-24 08:30:00'),
+(24, 24, 65, 15, '2023-09-24 09:45:00'),
+(25, 25, 33, 8, '2023-09-24 10:50:00'),
+(26, 26, 21, 6, '2023-09-24 11:30:00'),
+(27, 27, 14, 5, '2023-09-24 14:10:00'),
+(28, 28, 27, 8, '2023-09-24 15:00:00'),
+(29, 29, 18, 5, '2023-09-25 09:15:00'),
+(30, 30, 95, 20, '2023-09-25 10:00:00'),
+(31, 31, 42, 10, '2023-09-25 11:10:00'),
+(32, 32, 110, 25, '2023-09-25 13:30:00'),
+(33, 33, 88, 15, '2023-09-25 14:45:00'),
+(34, 34, 64, 12, '2023-09-25 16:20:00'),
+(35, 35, 25, 5, '2023-09-26 08:50:00'),
+(36, 36, 13, 5, '2023-09-26 09:30:00'),
+(37, 37, 10, 5, '2023-09-26 10:15:00'),
+(38, 38, 17, 5, '2023-09-26 11:00:00'),
+(39, 39, 5, 5, '2023-09-26 14:00:00'),
+(40, 40, 8, 5, '2023-09-26 15:30:00'),
+(41, 41, 16, 5, '2023-09-27 09:10:00'),
+(42, 42, 38, 10, '2023-09-27 10:00:00'),
+(43, 43, 45, 10, '2023-09-27 10:45:00'),
+(44, 44, 52, 12, '2023-09-27 11:30:00'),
+(45, 45, 60, 15, '2023-09-27 14:15:00'),
+(46, 46, 140, 30, '2023-09-27 15:00:00'),
+(47, 47, 35, 8, '2023-09-27 16:10:00'),
+(48, 48, 48, 10, '2023-09-28 08:40:00'),
+(49, 49, 22, 5, '2023-09-28 09:20:00'),
+(50, 50, 11, 5, '2023-09-28 10:05:00'),
+(51, 51, 29, 8, '2023-09-28 11:00:00'),
+(52, 52, 75, 15, '2023-09-28 13:50:00'),
+(53, 53, 14, 5, '2023-09-28 14:30:00'),
+(54, 54, 130, 25, '2023-09-28 15:45:00'),
+(55, 55, 9, 5, '2023-09-29 09:00:00'),
+(56, 56, 26, 6, '2023-09-29 09:40:00'),
+(57, 57, 40, 10, '2023-09-29 10:30:00'),
+(58, 58, 18, 5, '2023-09-29 11:15:00'),
+(59, 59, 55, 12, '2023-09-29 14:00:00'),
+(60, 60, 32, 8, '2023-09-29 15:10:00'),
+(61, 61, 20, 5, '2023-09-29 16:00:00'),
+(62, 62, 15, 5, '2023-09-30 08:30:00'),
+(63, 63, 28, 6, '2023-09-30 09:15:00'),
+(64, 64, 24, 5, '2023-09-30 10:00:00'),
+(65, 65, 36, 8, '2023-09-30 11:20:00'),
+(66, 66, 42, 10, '2023-09-30 13:40:00'),
+(67, 67, 19, 5, '2023-09-30 14:25:00'),
+(68, 68, 12, 5, '2023-09-30 15:30:00'),
+(69, 69, 68, 15, '2023-10-01 09:00:00'),
+(70, 70, 10, 5, '2023-10-01 09:45:00'),
+(71, 71, 7, 5, '2023-10-01 10:30:00'),
+(72, 72, 16, 5, '2023-10-01 11:15:00'),
+(73, 73, 4, 5, '2023-10-01 14:00:00'),
+(74, 74, 6, 5, '2023-10-01 14:50:00'),
+(75, 75, 80, 20, '2023-10-01 15:40:00'),
+(76, 76, 150, 30, '2023-10-02 08:45:00'),
+(77, 77, 115, 25, '2023-10-02 09:30:00'),
+(78, 78, 22, 5, '2023-10-02 10:15:00'),
+(79, 79, 13, 5, '2023-10-02 11:00:00'),
+(80, 80, 200, 40, '2023-10-02 13:30:00'),
+(81, 81, 180, 35, '2023-10-02 14:20:00'),
+(82, 82, 45, 10, '2023-10-02 15:10:00'),
+(83, 83, 90, 20, '2023-10-03 09:00:00'),
+(84, 84, 85, 20, '2023-10-03 09:50:00'),
+(85, 85, 30, 8, '2023-10-03 10:40:00'),
+(86, 86, 50, 12, '2023-10-03 11:25:00'),
+(87, 87, 40, 10, '2023-10-03 14:00:00'),
+(88, 88, 38, 10, '2023-10-03 14:45:00'),
+(89, 89, 65, 15, '2023-10-03 15:30:00'),
+(90, 90, 17, 5, '2023-10-04 09:10:00'),
+(91, 91, 23, 5, '2023-10-04 10:00:00'),
+(92, 92, 19, 5, '2023-10-04 10:45:00'),
+(93, 93, 55, 12, '2023-10-04 11:30:00'),
+(94, 94, 48, 10, '2023-10-04 14:15:00'),
+(95, 95, 27, 6, '2023-10-04 15:00:00'),
+(96, 96, 34, 8, '2023-10-04 16:00:00'),
+(97, 97, 11, 5, '2023-10-05 09:00:00'),
+(98, 98, 26, 6, '2023-10-05 09:45:00'),
+(99, 99, 30, 8, '2023-10-05 10:30:00'),
+(100, 100, 42, 10, '2023-10-05 11:15:00');
+select * from pedido;
+INSERT INTO pedido (id_pedido, id_cliente, id_funcionario, data_pedido, status, valor_total) VALUES
+(81, 1, 3, '2023-11-01 09:15:00', 'Entregue', 1250.00),
+(82, 2, 5, '2023-11-01 10:30:00', 'Entregue', 400.00),
+(83, 3, 1, '2023-11-01 11:45:00', 'Entregue', 890.00),
+(84, 4, 2, '2023-11-02 08:20:00', 'Entregue', 300.00),
+(85, 5, 4, '2023-11-02 09:50:00', 'Entregue', 1350.00),
+(86, 6, 3, '2023-11-02 14:10:00', 'Entregue', 650.00),
+(87, 7, 6, '2023-11-03 10:05:00', 'Entregue', 210.00),
+(88, 8, 1, '2023-11-03 11:30:00', 'Entregue', 1030.00),
+(89, 9, 7, '2023-11-03 15:40:00', 'Entregue', 480.00),
+(90, 10, 2, '2023-11-04 09:00:00', 'Entregue', 970.00),
+(91, 11, 8, '2023-11-04 10:15:00', 'Entregue', 420.00),
+(92, 12, 5, '2023-11-04 13:50:00', 'Entregue', 890.00),
+(93, 13, 9, '2023-11-05 08:45:00', 'Entregue', 600.00),
+(94, 14, 4, '2023-11-05 11:10:00', 'Entregue', 950.00),
+(95, 15, 3, '2023-11-05 14:25:00', 'Entregue', 2780.00),
+(96, 16, 10, '2023-11-06 09:30:00', 'Entregue', 1230.00),
+(97, 17, 1, '2023-11-06 10:50:00', 'Entregue', 180.00),
+(98, 18, 6, '2023-11-06 15:00:00', 'Entregue', 490.00),
+(99, 19, 2, '2023-11-07 08:30:00', 'Entregue', 380.00),
+(100, 20, 7, '2023-11-07 11:20:00', 'Entregue', 210.00),
+(101, 21, 5, '2023-11-07 16:15:00', 'Entregue', 820.00),
+(102, 22, 8, '2023-11-08 09:10:00', 'Entregue', 1250.00),
+(103, 23, 9, '2023-11-08 10:40:00', 'Entregue', 185.00),
+(104, 24, 4, '2023-11-08 14:00:00', 'Entregue', 280.00),
+(105, 25, 3, '2023-11-09 09:25:00', 'Entregue', 1290.00),
+(106, 26, 10, '2023-11-09 11:50:00', 'Enviado', 390.00),
+(107, 27, 1, '2023-11-09 15:10:00', 'Enviado', 890.00),
+(108, 28, 2, '2023-11-10 08:40:00', 'Enviado', 150.00),
+(109, 29, 6, '2023-11-10 10:00:00', 'Enviado', 390.00),
+(110, 30, 7, '2023-11-10 13:30:00', 'Enviado', 110.00),
+(111, 31, 5, '2023-11-11 09:15:00', 'Em Processamento', 445.00),
+(112, 32, 8, '2023-11-11 11:05:00', 'Em Processamento', 160.00),
+(113, 33, 9, '2023-11-11 14:45:00', 'Em Processamento', 120.00),
+(114, 34, 4, '2023-11-12 08:50:00', 'Em Processamento', 580.00),
+(115, 35, 3, '2023-11-12 10:20:00', 'Em Processamento', 95.00),
+(116, 36, 2, '2023-11-12 15:00:00', 'Pendente', 290.00),
+(117, 37, 1, '2023-11-13 09:00:00', 'Pendente', 85.00),
+(118, 38, 10, '2023-11-13 11:30:00', 'Pendente', 680.00),
+(119, 39, 6, '2023-11-13 14:15:00', 'Cancelado', 1850.00),
+(120, 40, 7, '2023-11-13 16:00:00', 'Pendente', 240.00),
+(121, 1, 3, '2023-11-14 09:15:00', 'Entregue', 3500.00),
+(122, 2, 5, '2023-11-14 10:30:00', 'Entregue', 2450.00),
+(123, 3, 1, '2023-11-14 11:45:00', 'Entregue', 1200.00),
+(124, 4, 2, '2023-11-15 08:20:00', 'Entregue', 350.00),
+(125, 5, 4, '2023-11-15 09:50:00', 'Entregue', 1350.00),
+(126, 6, 3, '2023-11-15 14:10:00', 'Entregue', 650.00),
+(127, 7, 6, '2023-11-16 10:05:00', 'Entregue', 400.00),
+(128, 8, 1, '2023-11-16 11:30:00', 'Entregue', 1030.00),
+(129, 9, 7, '2023-11-16 15:40:00', 'Entregue', 480.00),
+(130, 10, 2, '2023-11-17 09:00:00', 'Entregue', 970.00),
+(131, 11, 8, '2023-11-17 10:15:00', 'Entregue', 420.00),
+(132, 12, 5, '2023-11-17 13:50:00', 'Entregue', 890.00),
+(133, 13, 9, '2023-11-18 08:45:00', 'Entregue', 600.00),
+(134, 14, 4, '2023-11-18 11:10:00', 'Entregue', 950.00),
+(135, 15, 3, '2023-11-18 14:25:00', 'Entregue', 2780.00),
+(136, 16, 10, '2023-11-19 09:30:00', 'Entregue', 1230.00),
+(137, 17, 1, '2023-11-19 10:50:00', 'Entregue', 180.00),
+(138, 18, 6, '2023-11-19 15:00:00', 'Entregue', 490.00),
+(139, 19, 2, '2023-11-20 08:30:00', 'Entregue', 380.00),
+(140, 20, 7, '2023-11-20 11:20:00', 'Entregue', 210.00),
+(141, 21, 5, '2023-11-20 16:15:00', 'Entregue', 820.00),
+(142, 22, 8, '2023-11-21 09:10:00', 'Entregue', 1250.00),
+(143, 23, 9, '2023-11-21 10:40:00', 'Entregue', 185.00),
+(144, 24, 4, '2023-11-21 14:00:00', 'Entregue', 280.00),
+(145, 25, 3, '2023-11-22 09:25:00', 'Entregue', 1290.00),
+(146, 26, 10, '2023-11-22 11:50:00', 'Enviado', 390.00),
+(147, 27, 1, '2023-11-22 15:10:00', 'Enviado', 890.00),
+(148, 28, 2, '2023-11-23 08:40:00', 'Enviado', 150.00),
+(149, 29, 6, '2023-11-23 10:00:00', 'Enviado', 390.00),
+(150, 30, 7, '2023-11-23 13:30:00', 'Enviado', 110.00),
+(151, 31, 5, '2023-11-24 09:15:00', 'Em Processamento', 445.00),
+(152, 32, 8, '2023-11-24 11:05:00', 'Em Processamento', 160.00),
+(153, 33, 9, '2023-11-24 14:45:00', 'Em Processamento', 120.00),
+(154, 34, 4, '2023-11-25 08:50:00', 'Em Processamento', 580.00),
+(155, 35, 3, '2023-11-25 10:20:00', 'Em Processamento', 95.00),
+(156, 36, 2, '2023-11-25 15:00:00', 'Pendente', 290.00),
+(157, 37, 1, '2023-11-26 09:00:00', 'Pendente', 85.00),
+(158, 38, 10, '2023-11-26 11:30:00', 'Pendente', 680.00),
+(159, 39, 6, '2023-11-26 14:15:00', 'Cancelado', 1850.00),
+(160, 40, 7, '2023-11-26 16:00:00', 'Pendente', 240.00);
+select * from pedido;
+INSERT INTO item_pedido (id_pedido, id_produto, quantidade, preco_unitario, desconto) VALUES
+(81, 8, 1, 1250.00, 0.00),
+(82, 3, 1, 400.00, 0.00),
+(83, 13, 1, 890.00, 0.00),
+(84, 14, 1, 300.00, 0.00),
+(85, 6, 1, 1350.00, 0.00),
+(86, 7, 2, 325.00, 0.00),
+(87, 12, 1, 210.00, 0.00),
+(88, 9, 2, 515.00, 0.00),
+(89, 10, 1, 500.00, 20.00),
+(90, 11, 1, 970.00, 0.00),
+(91, 12, 2, 210.00, 0.00),
+(92, 13, 1, 890.00, 0.00),
+(93, 14, 2, 300.00, 0.00),
+(94, 15, 1, 1000.00, 50.00),
+(95, 1, 1, 2780.00, 0.00),
+(96, 2, 1, 1230.00, 0.00),
+(97, 3, 1, 200.00, 20.00),
+(98, 4, 1, 490.00, 0.00),
+(99, 5, 1, 380.00, 0.00),
+(100, 6, 1, 210.00, 0.00),
+(101, 7, 2, 410.00, 0.00),
+(102, 8, 1, 1250.00, 0.00),
+(103, 9, 1, 185.00, 0.00),
+(104, 10, 1, 280.00, 0.00),
+(105, 11, 1, 1290.00, 0.00),
+(106, 12, 1, 390.00, 0.00),
+(107, 13, 1, 890.00, 0.00),
+(108, 14, 1, 150.00, 0.00),
+(109, 15, 1, 390.00, 0.00),
+(110, 3, 1, 110.00, 0.00),
+(111, 4, 1, 445.00, 0.00),
+(112, 5, 1, 160.00, 0.00),
+(113, 6, 1, 120.00, 0.00),
+(114, 7, 2, 290.00, 0.00),
+(115, 8, 1, 95.00, 0.00),
+(116, 9, 1, 290.00, 0.00),
+(117, 10, 1, 85.00, 0.00),
+(118, 11, 1, 680.00, 0.00),
+(119, 12, 1, 1850.00, 0.00),
+(120, 13, 1, 240.00, 0.00),
+(121, 1, 1, 3500.00, 0.00),
+(122, 2, 1, 2450.00, 0.00),
+(123, 4, 3, 400.00, 0.00),
+(124, 5, 1, 350.00, 0.00),
+(125, 6, 1, 1350.00, 0.00),
+(126, 7, 2, 325.00, 0.00),
+(127, 8, 1, 400.00, 0.00),
+(128, 9, 2, 515.00, 0.00),
+(129, 10, 1, 500.00, 20.00),
+(130, 11, 1, 970.00, 0.00),
+(131, 12, 2, 210.00, 0.00),
+(132, 13, 1, 890.00, 0.00),
+(133, 14, 2, 300.00, 0.00),
+(134, 15, 1, 1000.00, 50.00),
+(135, 1, 1, 2780.00, 0.00),
+(136, 2, 1, 1230.00, 0.00),
+(137, 3, 1, 200.00, 20.00),
+(138, 4, 1, 490.00, 0.00),
+(139, 5, 1, 380.00, 0.00),
+(140, 6, 1, 210.00, 0.00),
+(141, 7, 2, 410.00, 0.00),
+(142, 8, 1, 1250.00, 0.00),
+(143, 9, 1, 185.00, 0.00),
+(144, 10, 1, 280.00, 0.00),
+(145, 11, 1, 1290.00, 0.00),
+(146, 12, 1, 390.00, 0.00),
+(147, 13, 1, 890.00, 0.00),
+(148, 14, 1, 150.00, 0.00),
+(149, 15, 1, 390.00, 0.00),
+(150, 3, 1, 110.00, 0.00),
+(151, 4, 1, 445.00, 0.00),
+(152, 5, 1, 160.00, 0.00),
+(153, 6, 1, 120.00, 0.00),
+(154, 7, 2, 290.00, 0.00),
+(155, 8, 1, 95.00, 0.00),
+(156, 9, 1, 290.00, 0.00),
+(157, 10, 1, 85.00, 0.00),
+(158, 11, 1, 680.00, 0.00),
+(159, 12, 1, 1850.00, 0.00),
+(160, 13, 1, 240.00, 0.00);
+
+-- 1. Criação da tabela pagamento (caso ainda não tenha executado)
+CREATE TABLE IF NOT EXISTS pagamento (
     id_pagamento INT AUTO_INCREMENT PRIMARY KEY,
-    id_pedido INT UNIQUE,
-    valor_pago DECIMAL(10,2) NOT NULL,
+    id_pedido INT NOT NULL,
+    data_pagamento DATETIME,
+    valor DECIMAL(10,2) NOT NULL,
     forma_pagamento VARCHAR(30) NOT NULL,
-    data_pagamento DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) NOT NULL,
     FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
 );
+
+-- 2. Inserção dos pagamentos para os pedidos 81 até 160
+INSERT INTO pagamento (id_pedido, data_pagamento, valor, forma_pagamento, status) VALUES
+(81, '2023-11-01 09:16:00', 1250.00, 'Cartão de Crédito', 'Aprovado'),
+(82, '2023-11-01 10:31:00', 400.00, 'Pix', 'Aprovado'),
+(83, '2023-11-01 11:46:00', 890.00, 'Cartão de Débito', 'Aprovado'),
+(84, '2023-11-02 08:21:00', 300.00, 'Pix', 'Aprovado'),
+(85, '2023-11-02 09:51:00', 1350.00, 'Cartão de Crédito', 'Aprovado'),
+(86, '2023-11-02 14:11:00', 650.00, 'Boleto', 'Aprovado'),
+(87, '2023-11-03 10:06:00', 210.00, 'Pix', 'Aprovado'),
+(88, '2023-11-03 11:31:00', 1030.00, 'Cartão de Crédito', 'Aprovado'),
+(89, '2023-11-03 15:41:00', 480.00, 'Cartão de Débito', 'Aprovado'),
+(90, '2023-11-04 09:01:00', 970.00, 'Pix', 'Aprovado'),
+(91, '2023-11-04 10:16:00', 420.00, 'Cartão de Crédito', 'Aprovado'),
+(92, '2023-11-04 13:51:00', 890.00, 'Boleto', 'Aprovado'),
+(93, '2023-11-05 08:46:00', 600.00, 'Pix', 'Aprovado'),
+(94, '2023-11-05 11:11:00', 950.00, 'Cartão de Crédito', 'Aprovado'),
+(95, '2023-11-05 14:26:00', 2780.00, 'Cartão de Crédito', 'Aprovado'),
+(96, '2023-11-06 09:31:00', 1230.00, 'Pix', 'Aprovado'),
+(97, '2023-11-06 10:51:00', 180.00, 'Cartão de Débito', 'Aprovado'),
+(98, '2023-11-06 15:01:00', 490.00, 'Boleto', 'Aprovado'),
+(99, '2023-11-07 08:31:00', 380.00, 'Pix', 'Aprovado'),
+(100, '2023-11-07 11:21:00', 210.00, 'Cartão de Crédito', 'Aprovado'),
+(101, '2023-11-07 16:16:00', 820.00, 'Cartão de Crédito', 'Aprovado'),
+(102, '2023-11-08 09:11:00', 1250.00, 'Pix', 'Aprovado'),
+(103, '2023-11-08 10:41:00', 185.00, 'Cartão de Débito', 'Aprovado'),
+(104, '2023-11-08 14:01:00', 280.00, 'Boleto', 'Aprovado'),
+(105, '2023-11-09 09:26:00', 1290.00, 'Cartão de Crédito', 'Aprovado'),
+(106, '2023-11-09 11:51:00', 390.00, 'Pix', 'Aprovado'),
+(107, '2023-11-09 15:11:00', 890.00, 'Cartão de Crédito', 'Aprovado'),
+(108, '2023-11-10 08:41:00', 150.00, 'Pix', 'Aprovado'),
+(109, '2023-11-10 10:01:00', 390.00, 'Boleto', 'Aprovado'),
+(110, '2023-11-10 13:31:00', 110.00, 'Cartão de Débito', 'Aprovado'),
+(111, '2023-11-11 09:16:00', 445.00, 'Pix', 'Aprovado'),
+(112, '2023-11-11 11:06:00', 160.00, 'Cartão de Crédito', 'Aprovado'),
+(113, '2023-11-11 14:46:00', 120.00, 'Cartão de Débito', 'Aprovado'),
+(114, '2023-11-12 08:51:00', 580.00, 'Pix', 'Aprovado'),
+(115, '2023-11-12 10:21:00', 95.00, 'Boleto', 'Aprovado'),
+(116, NULL, 290.00, 'Boleto', 'Pendente'),
+(117, NULL, 85.00, 'Pix', 'Pendente'),
+(118, NULL, 680.00, 'Cartão de Crédito', 'Pendente'),
+(119, '2023-11-13 14:16:00', 1850.00, 'Cartão de Crédito', 'Estornado'),
+(120, NULL, 240.00, 'Boleto', 'Pendente'),
+(121, '2023-11-14 09:16:00', 3500.00, 'Cartão de Crédito', 'Aprovado'),
+(122, '2023-11-14 10:31:00', 2450.00, 'Pix', 'Aprovado'),
+(123, '2023-11-14 11:46:00', 1200.00, 'Cartão de Débito', 'Aprovado'),
+(124, '2023-11-15 08:21:00', 350.00, 'Pix', 'Aprovado'),
+(125, '2023-11-15 09:51:00', 1350.00, 'Cartão de Crédito', 'Aprovado'),
+(126, '2023-11-15 14:11:00', 650.00, 'Boleto', 'Aprovado'),
+(127, '2023-11-16 10:06:00', 400.00, 'Pix', 'Aprovado'),
+(128, '2023-11-16 11:31:00', 1030.00, 'Cartão de Crédito', 'Aprovado'),
+(129, '2023-11-16 15:41:00', 480.00, 'Cartão de Débito', 'Aprovado'),
+(130, '2023-11-17 09:01:00', 970.00, 'Pix', 'Aprovado'),
+(131, '2023-11-17 10:16:00', 420.00, 'Cartão de Crédito', 'Aprovado'),
+(132, '2023-11-17 13:51:00', 890.00, 'Boleto', 'Aprovado'),
+(133, '2023-11-18 08:46:00', 600.00, 'Pix', 'Aprovado'),
+(134, '2023-11-18 11:11:00', 950.00, 'Cartão de Crédito', 'Aprovado'),
+(135, '2023-11-18 14:26:00', 2780.00, 'Cartão de Crédito', 'Aprovado'),
+(136, '2023-11-19 09:31:00', 1230.00, 'Pix', 'Aprovado'),
+(137, '2023-11-19 10:51:00', 180.00, 'Cartão de Débito', 'Aprovado'),
+(138, '2023-11-19 15:01:00', 490.00, 'Boleto', 'Aprovado'),
+(139, '2023-11-20 08:31:00', 380.00, 'Pix', 'Aprovado'),
+(140, '2023-11-20 11:21:00', 210.00, 'Cartão de Crédito', 'Aprovado'),
+(141, '2023-11-20 16:16:00', 820.00, 'Cartão de Crédito', 'Aprovado'),
+(142, '2023-11-21 09:11:00', 1250.00, 'Pix', 'Aprovado'),
+(143, '2023-11-21 10:41:00', 185.00, 'Cartão de Débito', 'Aprovado'),
+(144, '2023-11-21 14:01:00', 280.00, 'Boleto', 'Aprovado'),
+(145, '2023-11-22 09:26:00', 1290.00, 'Cartão de Crédito', 'Aprovado'),
+(146, '2023-11-22 11:51:00', 390.00, 'Pix', 'Aprovado'),
+(147, '2023-11-22 15:11:00', 890.00, 'Cartão de Crédito', 'Aprovado'),
+(148, '2023-11-23 08:41:00', 150.00, 'Pix', 'Aprovado'),
+(149, '2023-11-23 10:01:00', 390.00, 'Boleto', 'Aprovado'),
+(150, '2023-11-23 13:31:00', 110.00, 'Cartão de Débito', 'Aprovado'),
+(151, '2023-11-24 09:16:00', 445.00, 'Pix', 'Aprovado'),
+(152, '2023-11-24 11:06:00', 160.00, 'Cartão de Crédito', 'Aprovado'),
+(153, '2023-11-24 14:46:00', 120.00, 'Cartão de Débito', 'Aprovado'),
+(154, '2023-11-25 08:51:00', 580.00, 'Pix', 'Aprovado'),
+(155, '2023-11-25 10:21:00', 95.00, 'Boleto', 'Aprovado'),
+(156, NULL, 290.00, 'Boleto', 'Pendente'),
+(157, NULL, 85.00, 'Pix', 'Pendente'),
+(158, NULL, 680.00, 'Cartão de Crédito', 'Pendente'),
+(159, '2023-11-26 14:16:00', 1850.00, 'Cartão de Crédito', 'Estornado'),
+(160, NULL, 240.00, 'Boleto', 'Pendente');
+
+select * from produto;
+select nome, marca, preco from produto;
+select cnpj, email from fornecedor;
+select * from cliente;
+select nome, estado from cliente where estado = 'SP';
+select * from funcionario;
+select * from estoque;
+select * from pedido;
+select * from pagamento;
+select * from item_pedido;
+select * from categoria;
+select * from produto;
+select * from fornecedor;
+
+select nome, cpf from funcionario;
+
+select data_nasc, cidade, estado from cliente;
+
+select * from produto where preco >= 1000;
+
+select * from produto where preco < 500;
+
+select * from funcionario where salario > 6000;
+
+select * from produto where marca = "dell";
+
+select preco from produto where preco > 500 and preco <2000 order by preco desc; 
+
+select * from pfuncionario where salario > 5000 and cargo = 'gerente de projetos';
+
+select cargo, salario from funcionario;
+select * from cliente where cidade = 'curitiba' or cidade = 'SP';
+
+select * from produto where preco > 1000 and preco < 8000 order by preco desc;
+
+select * from produto where modelo like "a%" order by modelo;
+
+select nome from cliente order by nome;
+
+select nome, preco from produto where preco >= 500 order by preco;
+
+select nome, preco from produto where preco >= 500 order by nome;
+
+select * from pedido order by valor_total desc;
+
+select * from cliente where nome = "a%";
+
+select * from cliente where nome like "%o";
+
+select * from produto where nome like "%notebook%";
+
+select *  from funcionario where nome like "%silva%";
+
+select * from produto where preco between 1000 and 5000;
+
+select * from funcionario where salario between 5000 and 8000 order by salario;
+
+select * from cliente where estado in("PR","SP","RJ");
+
+select * from pedido where status in ("concluido", "cancelado");
+
+select * from pagamento where data_pagamento is null;
+
+select nome,preco from produto where preco > 1000 and marca = 'dell'order by preco desc;
+
+
+
+select nome,marca,preco from produto where preco between 500 and 3000 and marca like "a%" order by preco;  
+
+select * from cliente;
+select nome, email from cliente order by nome;
+select nome, prec from produto order by prec desc;
+
+select nome, marca, preco from produto order by marca asc, nome asc;
+select * from pedido order by valor_total desc;
+select * from cliente where nome like 'a%';
+select * from cliente where nome like '%ana%';
+select * from produto where preco between 1000 and 5000;
+select salario from funcionario where salario between 5000 and 8000 order by salario asc;
+
+select * from cliente where estado in ('sp', 'pr', 'rj');
+
+select * from pedido where status in ('CONCLUIDO', 'CANCELADO');
+
+select nome, preco from produto where preco > 1000 and marca like '%o%' order by preco desc;
+
+select * from produto;
+
+select nome,salario from funcionario where salario between 5000 and 8000 order by salario desc;
+
+select nome,marca , preco from produto where preco between 500 and 3000 and marca like '%s%' order by preco;
+
+select * from pedido where status = 'cooncluido' and valor_total >1000 order by valor_total desc;
+
+select * from cliente;
+
+select count(*) as quantidade_clientes from cliente;
+
+select count(*) as quantidade_produtos from produto;
+
+select count(*) as quantidade_funcionarios from funcionario;
+
+select sum(salario) as soma_salario from funcionario;
+
+select count(*) as total_funcioonario, sum(salario) as total_salario from funcionario;
+
+select avg(salario) as medio_salario from funcionario;
+
+select round (avg(salario)) as media_salario from funcionario;
+
+select max(salario) as maior_salario from funcionario;
+
+select min(salario) as menor_salario from funcionario;
 
